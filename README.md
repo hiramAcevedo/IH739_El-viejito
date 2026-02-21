@@ -1,5 +1,12 @@
 # Tequila El Viejito — Sistema Web
+
 **Proyecto VII (IH739) | Universidad de Guadalajara — Sistema de Universidad Virtual**
+
+![Vue](https://img.shields.io/badge/Vue-3.x-42b883?logo=vue.js&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-5.x-646cff?logo=vite&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ecf8e?logo=supabase&logoColor=white)
+![Sprint](https://img.shields.io/badge/Sprint-1%20completado-success)
+![License](https://img.shields.io/badge/Licencia-MIT-blue)
 
 ---
 
@@ -7,10 +14,10 @@
 
 | Rol | Integrante |
 |-----|------------|
-| Product Owner (PO) | Marcela López |
-| Scrum Master (SM) | Aritzai Silva |
-| Developer (DEV) | Hiram Acevedo |
-| Developer (DEV) | Daniel Aguilar |
+| Product Owner (PO) | Marcela López Núñez |
+| Scrum Master (SM) | Aritzai Guadalupe Silva Galván |
+| Developer (DEV) | Hiram Agustín Acevedo López |
+| Developer (DEV) | Arturo Daniel Aguilar González |
 
 **Asesor:** Sergio Ulises Lillingston Pérez
 
@@ -18,36 +25,95 @@
 
 ## 🛠️ Stack tecnológico
 
-| Capa | Tecnología |
-|------|-----------|
-| Frontend | Vue 3 + Vite |
-| Routing | Vue Router 4 |
-| Estado | Pinia |
-| Backend as a Service | Supabase (PostgreSQL + Auth + Storage) |
-| Slider | Swiper.js 11 |
-| Calidad de código | ESLint + Prettier |
+| Capa | Tecnología | Propósito |
+|------|-----------|-----------|
+| Frontend | Vue 3 + Vite | UI reactiva y build optimizado |
+| Routing | Vue Router 4 | Navegación SPA con lazy-loading |
+| Estado | Pinia | Gestión de estado global |
+| Backend as a Service | Supabase (PostgreSQL) | Base de datos, Auth y Storage |
+| Slider | Swiper.js 11 | Carrusel de productos responsive |
+| Calidad de código | ESLint + Prettier | Análisis estático y formato |
 
 ---
 
-## 🚀 Sprint 1 — Incremento entregado
+## 🗄️ Base de datos
 
-**Periodo:** 14 feb – 20 feb 2026
+El esquema está definido en [`supabase_schema_sprint1.sql`](./supabase_schema_sprint1.sql).
+Para aplicarlo: **Supabase → SQL Editor → New query → pegar el archivo → Run**.
 
-### Completado en este sprint
+### Diagrama entidad-relación
 
-- ✅ Inicialización del proyecto Vue 3 + Vite con ESLint y Prettier configurados
-- ✅ Estructura de carpetas y repositorio Git
-- ✅ Vue Router con las 4 rutas principales (lazy-loading)
-- ✅ Cliente Supabase configurado vía variables de entorno
-- ✅ Landing Page: Hero fullscreen + Slider de productos (Swiper.js) + Sección bienvenida
-- ✅ NavBar responsive con menú hamburguesa para móvil
+```mermaid
+erDiagram
+    PRODUCTOS {
+        uuid id PK
+        text nombre
+        text descripcion
+        text tipo
+        numeric precio
+        text imagen_url
+        boolean activo
+        timestamptz created_at
+    }
 
-### En progreso / próximo sprint
+    PEDIDOS {
+        uuid id PK
+        text cliente_nombre
+        text cliente_email
+        uuid producto_id FK
+        int cantidad
+        numeric total
+        text estado
+        text notas
+        timestamptz created_at
+    }
 
-- 🔲 Sección "Nosotros" (Sprint 2 – PB4)
-- 🔲 Formulario de contacto + Google Maps (Sprint 2 – PB5)
-- 🔲 Footer con redes sociales (Sprint 2 – PB15)
-- 🔲 Catálogo completo conectado a Supabase (Sprint 2 – PB2)
+    USUARIOS_ADMIN {
+        uuid id PK
+        text nombre
+        text email
+        text rol
+        boolean activo
+        timestamptz created_at
+    }
+
+    PRODUCTOS ||--o{ PEDIDOS : "tiene"
+    USUARIOS_ADMIN }o--|| PRODUCTOS : "administra"
+```
+
+### Tablas
+
+**`productos`** — Catálogo de tequilas disponibles
+Tipos válidos: `blanco` · `reposado` · `añejo` · `extra_añejo`
+
+**`pedidos`** — Registro de órdenes de clientes
+Estados: `pendiente` → `confirmado` → `enviado` → `entregado` / `cancelado`
+
+**`usuarios_admin`** — Cuentas de administración del sistema
+Roles: `admin` · `superadmin`
+
+### Políticas de seguridad (Row Level Security)
+
+| Tabla | Operación | Quién puede |
+|-------|-----------|-------------|
+| `productos` | SELECT | Cualquier visitante (solo activos) |
+| `productos` | INSERT / UPDATE / DELETE | Usuario autenticado |
+| `pedidos` | Todas | Solo usuario autenticado |
+| `usuarios_admin` | SELECT | Solo el propio usuario (`auth.uid()`) |
+
+---
+
+## 🚀 Roadmap de sprints
+
+| Sprint | Periodo | Alcance | Estado |
+|--------|---------|---------|--------|
+| 1 | 14 – 20 feb | Infraestructura base, Landing Page, NavBar, schema BD | ✅ Completado |
+| 2 | 21 – 27 feb | Sección Nosotros, Contacto + Maps, Footer + RRSS | 🔲 Pendiente |
+| 3 | 28 feb – 06 mar | Catálogo de productos desde Supabase, WhatsApp Business | 🔲 Pendiente |
+| 4 | 07 – 13 mar | Vista detalle de producto, filtros por categoría y precio | 🔲 Pendiente |
+| 5 | 14 – 20 mar | Carrito de compras con persistencia local (MVP pedidos) | 🔲 Pendiente |
+| 6 | 21 – 27 mar | Formulario de pedido final, confirmación, compartir en RRSS | 🔲 Pendiente |
+| 7 | 28 mar – 13 may | Optimización, pruebas, documentación y despliegue final | 🔲 Pendiente |
 
 ---
 
@@ -65,7 +131,10 @@ npm install
 cp .env.example .env
 # Edita .env con tus credenciales de Supabase
 
-# 4. Correr en modo desarrollo
+# 4. Aplicar el schema en Supabase
+# Abre Supabase → SQL Editor → pega el contenido de supabase_schema_sprint1.sql
+
+# 5. Correr en modo desarrollo
 npm run dev
 ```
 
@@ -76,20 +145,46 @@ npm run dev
 ## 📁 Estructura del proyecto
 
 ```
-src/
-├── components/
-│   └── NavBar.vue          # Navegación responsive
-├── lib/
-│   └── supabaseClient.js   # Cliente y helpers de Supabase
-├── router/
-│   └── index.js            # Vue Router (4 rutas)
-├── views/
-│   ├── HomeView.vue        # Landing page (Hero + Slider + Bienvenida)
-│   ├── NosotrosView.vue    # Sprint 2
-│   ├── ProductosView.vue   # Sprint 2
-│   └── ContactoView.vue    # Sprint 2
-├── App.vue
-└── main.js
+IH739_El-viejito/
+├── src/
+│   ├── components/
+│   │   └── NavBar.vue              # Navegación responsive con hamburguesa
+│   ├── lib/
+│   │   └── supabaseClient.js       # Cliente Supabase + helpers
+│   ├── router/
+│   │   └── index.js                # Vue Router — 4 rutas con lazy-loading
+│   ├── views/
+│   │   ├── HomeView.vue            # Landing: Hero + Slider Swiper + Bienvenida
+│   │   ├── NosotrosView.vue        # Sprint 2
+│   │   ├── ProductosView.vue       # Sprint 2
+│   │   └── ContactoView.vue        # Sprint 2
+│   ├── App.vue
+│   └── main.js
+├── supabase_schema_sprint1.sql     # Schema BD: productos, pedidos, usuarios_admin
+├── .env.example                    # Plantilla de variables de entorno
+├── vite.config.js
+└── package.json
+```
+
+---
+
+## 🤝 Contribución
+
+Este proyecto sigue el flujo **fork → branch → pull request**.
+
+```bash
+# 1. Haz fork del repositorio y clónalo
+git clone https://github.com/TU_USUARIO/IH739_El-viejito.git
+
+# 2. Crea una branch con tu nombre y el sprint
+git checkout -b sprint-2-[tu-nombre]
+
+# 3. Desarrolla, commitea y sube
+git add .
+git commit -m "Sprint 2: descripción de lo que hiciste"
+git push origin sprint-2-[tu-nombre]
+
+# 4. Abre un Pull Request hacia main en 4liyat/IH739_El-viejito
 ```
 
 ---
