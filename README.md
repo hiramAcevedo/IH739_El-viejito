@@ -1,60 +1,97 @@
-Tequila El Viejito - Sistema Web
+# Tequila El Viejito — Sistema Web
+**Proyecto VII (IH739) | Universidad de Guadalajara — Sistema de Universidad Virtual**
 
-Proyecto VII (IH739) | Universidad de Guadalajara
+---
 
-Este proyecto consiste en el desarrollo de un sistema web integral para Tequila El Viejito, enfocado en la digitalización de su operación comercial.
-👥 Equipo y Roles
+## 👥 Equipo
 
-    Asesor: Sergio Ulises Lillingston Pérez
+| Rol | Integrante |
+|-----|------------|
+| Product Owner (PO) | Marcela López |
+| Scrum Master (SM) | Aritzai Silva |
+| Developer (DEV) | Hiram Acevedo |
+| Developer (DEV) | Daniel Aguilar |
 
-    Marcela López: Product Owner (PO)
+**Asesor:** Sergio Ulises Lillingston Pérez
 
-    Aritzai Silva: Scrum Master (SM)
+---
 
-    Hiram Acevedo: Developer (DEV)
+## 🛠️ Stack tecnológico
 
-    Daniel Aguilar: Developer (DEV)
+| Capa | Tecnología |
+|------|-----------|
+| Frontend | Vue 3 + Vite |
+| Routing | Vue Router 4 |
+| Estado | Pinia |
+| Backend as a Service | Supabase (PostgreSQL + Auth + Storage) |
+| Slider | Swiper.js 11 |
+| Calidad de código | ESLint + Prettier |
 
-🛠️ Tecnologías Utilizadas
+---
 
-El proyecto se construye sobre una arquitectura moderna para garantizar escalabilidad y rendimiento:
+## 🚀 Sprint 1 — Incremento entregado
 
-    Frontend: Vue 3 + Vite.
+**Periodo:** 14 feb – 20 feb 2026
 
-    Backend as a Service (BaaS): Supabase (PostgreSQL, Auth & Storage).
+### Completado en este sprint
 
-    Gestión de Estado: Pinia.
+- ✅ Inicialización del proyecto Vue 3 + Vite con ESLint y Prettier configurados
+- ✅ Estructura de carpetas y repositorio Git
+- ✅ Vue Router con las 4 rutas principales (lazy-loading)
+- ✅ Cliente Supabase configurado vía variables de entorno
+- ✅ Landing Page: Hero fullscreen + Slider de productos (Swiper.js) + Sección bienvenida
+- ✅ NavBar responsive con menú hamburguesa para móvil
 
-    Estilos/Componentes: Vue Router y ESLint/Prettier para calidad de código.
+### En progreso / próximo sprint
 
-🚀 Estado del Proyecto: Sprint 1
+- 🔲 Sección "Nosotros" (Sprint 2 – PB4)
+- 🔲 Formulario de contacto + Google Maps (Sprint 2 – PB5)
+- 🔲 Footer con redes sociales (Sprint 2 – PB15)
+- 🔲 Catálogo completo conectado a Supabase (Sprint 2 – PB2)
 
-Actualmente, el repositorio contiene el incremento correspondiente al Sprint 1, que incluye:
+---
 
-    Estructura base del proyecto y configuración de Git.
+## 💻 Instalación local
 
-    Conexión inicial con la base de datos de Supabase.
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/4liyat/IH739_El-viejito.git
+cd IH739_El-viejito
 
-    Maquetación de la Landing Page y menú de navegación responsive.
+# 2. Instalar dependencias
+npm install
 
-💻 Instalación y Uso
+# 3. Configurar variables de entorno
+cp .env.example .env
+# Edita .env con tus credenciales de Supabase
 
-Si deseas ejecutar este proyecto localmente, sigue estos pasos:
+# 4. Correr en modo desarrollo
+npm run dev
+```
 
-    Clonar el repositorio:
-    Bash
+> El servidor estará disponible en `http://localhost:5173`
 
-    git clone https://github.com/tu-usuario/tequila-el-viejito.git
+---
 
-    Instalar dependencias:
-    Bash
+## 📁 Estructura del proyecto
 
-    npm install
+```
+src/
+├── components/
+│   └── NavBar.vue          # Navegación responsive
+├── lib/
+│   └── supabaseClient.js   # Cliente y helpers de Supabase
+├── router/
+│   └── index.js            # Vue Router (4 rutas)
+├── views/
+│   ├── HomeView.vue        # Landing page (Hero + Slider + Bienvenida)
+│   ├── NosotrosView.vue    # Sprint 2
+│   ├── ProductosView.vue   # Sprint 2
+│   └── ContactoView.vue    # Sprint 2
+├── App.vue
+└── main.js
+```
 
-    Correr en modo desarrollo:
-    Bash
+---
 
-    npm run dev
-
-Licenciatura en Diseño de Sistemas Web
-Sistema de Universidad Virtual (SUV)
+*Licenciatura en Desarrollo de Sistemas Web — UDG Virtual*
