@@ -55,9 +55,7 @@
         <RouterLink to="/nosotros" class="btn-secondary">Conoce nuestra historia</RouterLink>
       </div>
       <div class="welcome__img">
-        <div class="welcome__img-placeholder" aria-hidden="true">
-          <span>🌵</span>
-        </div>
+        <img :src="imgHistoria" alt="Destilería El Viejito" class="welcome__real-img" />
       </div>
     </section>
   </main>
@@ -72,31 +70,32 @@
   import 'swiper/css/navigation'
   import 'swiper/css/pagination'
 
-  // Datos de ejemplo — en Sprint 2+ vendrán de Supabase
+  // Importación de imágenes locales
+  import imgHistoria from '@/assets/historia.png'
+  import imgHero from '@/assets/hero-nosotros.png'
+  import imgBlanco from '@/assets/tequila-blanco.png'
+  import imgReposado from '@/assets/tequila-reposado.png'
+  import imgAnejo from '@/assets/tequila-anejo.png'
+
+  // Datos de productos con tus imágenes de marca
   const featuredProducts = [
     {
       id: 1,
       name: 'Blanco Clásico',
       description: 'Cristalino, fresco y con notas herbales características del agave azul.',
-      img: 'https://placehold.co/400x500/1a1a1a/c9a84c?text=Blanco'
+      img: imgBlanco
     },
     {
       id: 2,
       name: 'Reposado Suave',
       description: 'Reposado 8 meses en barrica de roble blanco. Notas a vainilla y caramelo.',
-      img: 'https://placehold.co/400x500/1a1a1a/c9a84c?text=Reposado'
+      img: imgReposado
     },
     {
       id: 3,
       name: 'Añejo Premium',
       description: 'Añejado 18 meses. Complejo, con notas a chocolate amargo y frutos secos.',
-      img: 'https://placehold.co/400x500/1a1a1a/c9a84c?text=Añejo'
-    },
-    {
-      id: 4,
-      name: 'Extra Añejo',
-      description: 'Más de 3 años en barrica. La expresión máxima de nuestra destilería.',
-      img: 'https://placehold.co/400x500/1a1a1a/c9a84c?text=Extra+Añejo'
+      img: imgAnejo
     }
   ]
 
@@ -138,8 +137,8 @@
   .hero__overlay {
     position: absolute;
     inset: 0;
-    background: url('https://placehold.co/1920x1080/1a1a1a/2d1f0e?text=') center/cover no-repeat;
-    opacity: 0.3;
+    background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('@/assets/hero-nosotros.png') center/cover no-repeat;
+    opacity: 0.8;
   }
 
   .hero__content {
@@ -327,15 +326,12 @@
     color: #1a1a1a;
   }
 
-  .welcome__img-placeholder {
+  .welcome__real-img {
     width: 100%;
     aspect-ratio: 4/5;
-    background: linear-gradient(135deg, #1a1a1a, #2d1f0e);
+    object-fit: cover;
     border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 6rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
   }
 
   @media (max-width: 768px) {
