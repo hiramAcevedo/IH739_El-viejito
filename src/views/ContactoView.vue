@@ -128,7 +128,7 @@ const handleSubmit = async () => {
 
 .hero-section {
   height: 30vh;
-  background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('@/assets/hero-contacto.png');
+  background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('@/assets/hero-contacto.webp');
   background-size: cover;
   background-position: center;
   display: flex;

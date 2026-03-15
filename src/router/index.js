@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
+import { useAuthStore } from '@/stores/authStore'
 
 const routes = [
   {
@@ -28,6 +29,18 @@ const routes = [
     meta: { title: 'Contacto | Tequila El Viejito' }
   },
   {
+    path: '/login',
+    name: 'login',
+    component: () => import('@/views/LoginView.vue'),
+    meta: { title: 'Login | Tequila El Viejito' }
+  },
+  {
+    path: '/admin',
+    name: 'admin',
+    component: () => import('@/views/AdminView.vue'),
+    meta: { title: 'Panel de Administración | Tequila El Viejito', requiresAuth: true }
+  },
+  {
     // Catch-all: redirige rutas desconocidas al home
     path: '/:pathMatch(.*)*',
     redirect: '/'
@@ -40,6 +53,31 @@ const router = createRouter({
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) return savedPosition
     return { top: 0, behavior: 'smooth' }
+  }
+})
+
+// Navigation guard: protege rutas que requieren autenticación
+router.beforeEach(async (to, from, next) => {
+  const authStore = useAuthStore()
+  const requiresAuth = to.meta.requiresAuth
+
+  if (requiresAuth) {
+    // Verifica si el usuario está autenticado
+    const isAuthenticated = await authStore.checkAuth()
+
+    if (!isAuthenticated) {
+      // No está autenticado, redirige a login
+      next('/login')
+    } else {
+      // Está autenticado, permite la navegación
+      next()
+    }
+  } else if (to.path === '/login' && authStore.user) {
+    // Si ya está autenticado y trata de ir a login, redirige a admin
+    next('/admin')
+  } else {
+    // Permite la navegación normal
+    next()
   }
 })
 

@@ -78,11 +78,11 @@ import 'swiper/css'
 import 'swiper/css/pagination'
 
 // Importación de imágenes locales
-import imgHistoria from '@/assets/historia.png'
-import imgGaleria1 from '@/assets/galeria1.png'
-import imgGaleria2 from '@/assets/galeria2.png'
-import imgGaleria3 from '@/assets/galeria3.png'
-import imgGaleria4 from '@/assets/galeria4.png'
+import imgHistoria from '@/assets/historia.webp'
+import imgGaleria1 from '@/assets/galeria1.webp'
+import imgGaleria2 from '@/assets/galeria2.webp'
+import imgGaleria3 from '@/assets/galeria3.webp'
+import imgGaleria4 from '@/assets/galeria4.webp'
 
 const modules = [Pagination, Autoplay]
 
@@ -109,7 +109,7 @@ const galleryImages = [
 
 .hero-section {
   height: 40vh;
-  background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('@/assets/hero-nosotros.png');
+  background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('@/assets/hero-nosotros.webp');
   background-size: cover;
   background-position: center;
   display: flex;

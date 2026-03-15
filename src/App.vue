@@ -3,10 +3,10 @@
   <RouterView />
   <AppFooter />
   
-  <a 
-    href="https://wa.me/521234567890" 
-    class="whatsapp-float" 
-    target="_blank" 
+  <a
+    href="https://wa.me/5213312345678"
+    class="whatsapp-float"
+    target="_blank"
     rel="noopener"
     aria-label="Contactar por WhatsApp"
   >
