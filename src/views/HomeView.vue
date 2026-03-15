@@ -71,11 +71,11 @@
   import 'swiper/css/pagination'
 
   // Importación de imágenes locales
-  import imgHistoria from '@/assets/historia.png'
-  import imgHero from '@/assets/hero-nosotros.png'
-  import imgBlanco from '@/assets/tequila-blanco.png'
-  import imgReposado from '@/assets/tequila-reposado.png'
-  import imgAnejo from '@/assets/tequila-anejo.png'
+  import imgHistoria from '@/assets/historia.webp'
+  import imgHero from '@/assets/hero-nosotros.webp'
+  import imgBlanco from '@/assets/tequila-blanco.webp'
+  import imgReposado from '@/assets/tequila-reposado.webp'
+  import imgAnejo from '@/assets/tequila-anejo.webp'
 
   // Datos de productos con tus imágenes de marca
   const featuredProducts = [
@@ -137,7 +137,7 @@
   .hero__overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('@/assets/hero-nosotros.png') center/cover no-repeat;
+    background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('@/assets/hero-nosotros.webp') center/cover no-repeat;
     opacity: 0.8;
   }
 

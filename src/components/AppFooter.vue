@@ -10,12 +10,13 @@
         <div class="social-links">
           <a href="https://facebook.com" target="_blank" rel="noopener">Facebook</a>
           <a href="https://instagram.com" target="_blank" rel="noopener">Instagram</a>
+          <a href="https://tiktok.com" target="_blank" rel="noopener">TikTok</a>
         </div>
       </div>
       <div class="footer-contact">
         <h4>Contacto</h4>
         <p>Email: contacto@elviejito.com</p>
-        <p>Tel: +52 (XXX) XXX-XXXX</p>
+        <p>Tel: +52 (33) 1234-5678</p>
       </div>
     </div>
     <div class="footer-bottom">
