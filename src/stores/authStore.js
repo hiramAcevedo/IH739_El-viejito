@@ -36,6 +36,7 @@ export const useAuthStore = defineStore('auth', () => {
         .from('usuarios_admin')
         .select('id, nombre, rol')
         .eq('id', data.user.id)
+        .eq('activo', true)
         .single()
 
       if (adminError && adminError.code !== 'PGRST116') {
@@ -43,10 +44,13 @@ export const useAuthStore = defineStore('auth', () => {
         return { success: false, error: 'Error al verificar permisos' }
       }
 
-      if (adminData) {
-        isAdmin.value = true
+      if (!adminData) {
+        // Usuario autenticado pero no es admin activo: cerrar sesion
+        await supabase.auth.signOut()
+        return { success: false, error: 'Acceso restringido a administradores' }
       }
 
+      isAdmin.value = true
       user.value = data.user
       return { success: true }
     } catch (err) {
@@ -102,11 +106,12 @@ export const useAuthStore = defineStore('auth', () => {
 
       user.value = data.user
 
-      // Check admin status
+      // Check admin status (MJ2: solo admins activos)
       const { data: adminData, error: adminError } = await supabase
         .from('usuarios_admin')
         .select('id, nombre, rol')
         .eq('id', data.user.id)
+        .eq('activo', true)
         .single()
 
       if (adminError && adminError.code !== 'PGRST116') {
