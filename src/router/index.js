@@ -23,6 +23,13 @@ const routes = [
     meta: { title: 'Productos | Tequila El Viejito' }
   },
   {
+    path: '/productos/:id',
+    name: 'producto-detalle',
+    component: () => import('@/views/ProductoDetalleView.vue'),
+    meta: { title: 'Detalle | Tequila El Viejito' },
+    props: true
+  },
+  {
     path: '/contacto',
     name: 'contacto',
     component: () => import('@/views/ContactoView.vue'),

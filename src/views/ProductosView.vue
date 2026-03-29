@@ -4,11 +4,11 @@
     <section class="hero-section">
       <div class="hero-content">
         <h1>Nuestros Productos</h1>
-        <p>Selección premium de tequilas artesanales de El Viejito.</p>
+        <p>Seleccion premium de tequilas artesanales de El Viejito.</p>
       </div>
     </section>
 
-    <!-- Productos Grid Section -->
+    <!-- Productos Section -->
     <section class="content-section">
       <div class="container">
         <!-- Loading State -->
@@ -23,75 +23,142 @@
           <button @click="fetchProductos" class="retry-btn">Intentar de nuevo</button>
         </div>
 
-        <!-- Products Grid -->
-        <div v-else class="productos-grid">
-          <div v-for="producto in productos" :key="producto.id" class="product-card">
-            <div class="product-image-wrapper">
-              <img
-                :src="getProductImage(producto.tipo)"
-                :alt="producto.nombre"
-                loading="lazy"
-                class="product-image"
+        <template v-else>
+          <!-- Filtros (PB8) -->
+          <div class="filtros-bar">
+            <div class="filtros-tipo">
+              <button
+                :class="['filtro-btn', { active: filtroTipo === null }]"
+                @click="filtroTipo = null"
+              >
+                Todos
+              </button>
+              <button
+                v-for="tipo in tiposDisponibles"
+                :key="tipo.value"
+                :class="['filtro-btn', `filtro-${tipo.value}`, { active: filtroTipo === tipo.value }]"
+                @click="filtroTipo = tipo.value"
+              >
+                {{ tipo.label }}
+              </button>
+            </div>
+
+            <div class="filtros-precio">
+              <label class="filtro-label">Precio max: {{ formatPrice(precioMax) }}</label>
+              <input
+                type="range"
+                :min="precioRangoMin"
+                :max="precioRangoMax"
+                :step="10"
+                v-model.number="precioMax"
+                class="filtro-range"
               />
             </div>
-            <div class="product-info">
-              <div class="product-header">
-                <h3 class="product-name">{{ producto.nombre }}</h3>
-                <span :class="['type-badge', `badge-${producto.tipo}`]">
-                  {{ formatTipo(producto.tipo) }}
-                </span>
-              </div>
-              <p class="product-description">{{ producto.descripcion }}</p>
-              <div class="product-footer">
-                <span class="product-price">{{ formatPrice(producto.precio) }}</span>
-              </div>
-            </div>
           </div>
-        </div>
+
+          <!-- Contador de resultados -->
+          <p class="resultados-count" v-if="productosFiltrados.length !== productos.length">
+            Mostrando {{ productosFiltrados.length }} de {{ productos.length }} productos
+          </p>
+
+          <!-- Products Grid -->
+          <div v-if="productosFiltrados.length" class="productos-grid">
+            <router-link
+              v-for="producto in productosFiltrados"
+              :key="producto.id"
+              :to="{ name: 'producto-detalle', params: { id: producto.id } }"
+              class="product-card-link"
+            >
+              <div class="product-card">
+                <div class="product-image-wrapper">
+                  <img
+                    :src="resolveProductImage(producto.imagen_url)"
+                    :alt="producto.nombre"
+                    loading="lazy"
+                    class="product-image"
+                  />
+                </div>
+                <div class="product-info">
+                  <div class="product-header">
+                    <h3 class="product-name">{{ producto.nombre }}</h3>
+                    <span :class="['type-badge', `badge-${producto.tipo}`]">
+                      {{ formatTipo(producto.tipo) }}
+                    </span>
+                  </div>
+                  <p class="product-description">{{ producto.descripcion }}</p>
+                  <div class="product-footer">
+                    <span class="product-price">{{ formatPrice(producto.precio) }}</span>
+                    <span class="ver-detalle">Ver detalle &rarr;</span>
+                  </div>
+                </div>
+              </div>
+            </router-link>
+          </div>
+
+          <!-- Sin resultados -->
+          <div v-else class="empty-state">
+            <p>No hay productos que coincidan con los filtros seleccionados.</p>
+            <button @click="resetFiltros" class="retry-btn">Limpiar filtros</button>
+          </div>
+        </template>
       </div>
     </section>
   </main>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { getProductos } from '@/lib/supabaseClient'
+import { resolveProductImage } from '@/lib/imageHelper'
 
-// Importación de imágenes locales
-import imgBlanco from '@/assets/tequila-blanco.webp'
-import imgReposado from '@/assets/tequila-reposado.webp'
-import imgAnejo from '@/assets/tequila-anejo.webp'
-
-// Estado reactivo
 const productos = ref([])
 const loading = ref(false)
 const error = ref(false)
 
-// Mapeo de tipos a imágenes locales
-const imageMap = {
-  blanco: imgBlanco,
-  reposado: imgReposado,
-  añejo: imgAnejo,
-  extra_añejo: imgAnejo // Fallback a añejo
+// Filtros
+const filtroTipo = ref(null)
+const precioMax = ref(1000)
+
+const tiposDisponibles = [
+  { value: 'blanco', label: 'Blanco' },
+  { value: 'reposado', label: 'Reposado' },
+  { value: 'añejo', label: 'Añejo' },
+  { value: 'extra_añejo', label: 'Extra Añejo' }
+]
+
+const precioRangoMin = computed(() => {
+  if (!productos.value.length) return 0
+  return Math.floor(Math.min(...productos.value.map(p => Number(p.precio))))
+})
+
+const precioRangoMax = computed(() => {
+  if (!productos.value.length) return 1000
+  return Math.ceil(Math.max(...productos.value.map(p => Number(p.precio))))
+})
+
+const productosFiltrados = computed(() => {
+  return productos.value.filter(p => {
+    const pasaTipo = filtroTipo.value === null || p.tipo === filtroTipo.value
+    const pasaPrecio = Number(p.precio) <= precioMax.value
+    return pasaTipo && pasaPrecio
+  })
+})
+
+const resetFiltros = () => {
+  filtroTipo.value = null
+  precioMax.value = precioRangoMax.value
 }
 
-// Obtener imagen del producto basada en el tipo
-const getProductImage = (tipo) => {
-  return imageMap[tipo] || imgBlanco
-}
-
-// Formatear tipo de producto
 const formatTipo = (tipo) => {
   const labels = {
     blanco: 'Blanco',
     reposado: 'Reposado',
-    añejo: 'Añejo',
+    'añejo': 'Añejo',
     extra_añejo: 'Extra Añejo'
   }
   return labels[tipo] || tipo
 }
 
-// Formatear precio como MXN
 const formatPrice = (precio) => {
   return new Intl.NumberFormat('es-MX', {
     style: 'currency',
@@ -99,13 +166,13 @@ const formatPrice = (precio) => {
   }).format(precio)
 }
 
-// Obtener productos de Supabase
 const fetchProductos = async () => {
   loading.value = true
   error.value = false
   try {
     const data = await getProductos()
     productos.value = data
+    precioMax.value = Math.ceil(Math.max(...data.map(p => Number(p.precio))))
   } catch (err) {
     console.error('Error al cargar productos:', err)
     error.value = true
@@ -114,7 +181,6 @@ const fetchProductos = async () => {
   }
 }
 
-// Al montar el componente, cargar los productos
 onMounted(() => {
   fetchProductos()
 })
@@ -125,7 +191,7 @@ onMounted(() => {
   background-color: #faf7f2;
 }
 
-/* ─── Hero Section ─── */
+/* Hero Section */
 .hero-section {
   height: 40vh;
   background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
@@ -152,7 +218,7 @@ onMounted(() => {
   letter-spacing: 0.5px;
 }
 
-/* ─── Container ─── */
+/* Container */
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -160,11 +226,13 @@ onMounted(() => {
 }
 
 .content-section {
-  padding: 5rem 2rem;
+  padding: 3rem 2rem 5rem;
 }
 
-/* ─── Loading State ─── */
-.loading-state {
+/* Loading / Error */
+.loading-state,
+.error-state,
+.empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -184,27 +252,14 @@ onMounted(() => {
 }
 
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-.loading-state p {
+.loading-state p,
+.empty-state p {
   color: #666;
   font-size: 1.1rem;
-}
-
-/* ─── Error State ─── */
-.error-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem 2rem;
-  text-align: center;
 }
 
 .error-state p {
@@ -229,7 +284,75 @@ onMounted(() => {
   background-color: #b39340;
 }
 
-/* ─── Productos Grid ─── */
+/* Filtros */
+.filtros-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  padding: 1.25rem 1.5rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+.filtros-tipo {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.filtro-btn {
+  padding: 0.5rem 1rem;
+  border: 2px solid #e5e0d5;
+  background: white;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+  color: #555;
+}
+
+.filtro-btn:hover {
+  border-color: #c9a84c;
+  color: #c9a84c;
+}
+
+.filtro-btn.active {
+  background: #c9a84c;
+  border-color: #c9a84c;
+  color: white;
+}
+
+.filtros-precio {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 200px;
+}
+
+.filtro-label {
+  font-size: 0.85rem;
+  color: #555;
+  font-weight: 500;
+}
+
+.filtro-range {
+  width: 100%;
+  accent-color: #c9a84c;
+  cursor: pointer;
+}
+
+.resultados-count {
+  color: #888;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+/* Productos Grid */
 .productos-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -248,7 +371,15 @@ onMounted(() => {
   }
 }
 
-/* ─── Product Card ─── */
+/* Product Card Link */
+.product-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  height: 100%;
+}
+
+/* Product Card */
 .product-card {
   background: white;
   border-radius: 8px;
@@ -306,7 +437,7 @@ onMounted(() => {
   flex: 1;
 }
 
-/* ─── Type Badge ─── */
+/* Type Badge */
 .type-badge {
   display: inline-block;
   padding: 0.35rem 0.75rem;
@@ -319,25 +450,10 @@ onMounted(() => {
   flex-shrink: 0;
 }
 
-.badge-blanco {
-  background-color: #e8f4f8;
-  color: #0c566e;
-}
-
-.badge-reposado {
-  background-color: #fff3e0;
-  color: #e65100;
-}
-
-.badge-añejo {
-  background-color: #f3e5f5;
-  color: #6a1b9a;
-}
-
-.badge-extra_añejo {
-  background-color: #fce4ec;
-  color: #880e4f;
-}
+.badge-blanco { background-color: #e8f4f8; color: #0c566e; }
+.badge-reposado { background-color: #fff3e0; color: #e65100; }
+.badge-añejo { background-color: #f3e5f5; color: #6a1b9a; }
+.badge-extra_añejo { background-color: #fce4ec; color: #880e4f; }
 
 .product-description {
   color: #666;
@@ -363,7 +479,18 @@ onMounted(() => {
   font-family: 'Arial', sans-serif;
 }
 
-/* ─── Media Queries ─── */
+.ver-detalle {
+  font-size: 0.85rem;
+  color: #c9a84c;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.product-card:hover .ver-detalle {
+  color: #b39340;
+}
+
+/* Media Queries */
 @media (max-width: 768px) {
   .hero-section {
     height: 35vh;
@@ -378,7 +505,7 @@ onMounted(() => {
   }
 
   .content-section {
-    padding: 3rem 1rem;
+    padding: 2rem 1rem;
   }
 
   .container {
@@ -387,6 +514,11 @@ onMounted(() => {
 
   .product-image-wrapper {
     height: 240px;
+  }
+
+  .filtros-bar {
+    flex-direction: column;
+    align-items: stretch;
   }
 }
 </style>
