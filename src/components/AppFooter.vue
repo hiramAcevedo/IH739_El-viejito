@@ -3,14 +3,23 @@
     <div class="footer-container">
       <div class="footer-info">
         <h3>El Viejito</h3>
-        <p>Destilando tradición desde hace generaciones.</p>
+        <p>Destilando tradicion desde hace generaciones.</p>
       </div>
       <div class="footer-social">
-        <h4>Síguenos</h4>
+        <h4>Siguenos</h4>
         <div class="social-links">
-          <a href="https://facebook.com" target="_blank" rel="noopener">Facebook</a>
-          <a href="https://instagram.com" target="_blank" rel="noopener">Instagram</a>
-          <a href="https://tiktok.com" target="_blank" rel="noopener">TikTok</a>
+          <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook">
+            <Facebook :size="22" />
+          </a>
+          <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram">
+            <Instagram :size="22" />
+          </a>
+          <a href="https://tiktok.com" target="_blank" rel="noopener" aria-label="TikTok">
+            <Music2 :size="22" />
+          </a>
+          <a href="https://wa.me/5213312345678" target="_blank" rel="noopener" aria-label="WhatsApp">
+            <MessageCircle :size="22" />
+          </a>
         </div>
       </div>
       <div class="footer-contact">
@@ -24,6 +33,10 @@
     </div>
   </footer>
 </template>
+
+<script setup>
+import { Facebook, Instagram, Music2, MessageCircle } from 'lucide-vue-next'
+</script>
 
 <style scoped>
 .main-footer {
@@ -48,21 +61,31 @@
   margin-bottom: 1rem;
 }
 
+.footer-social h4,
+.footer-contact h4 {
+  color: #f5f0e8;
+  margin-bottom: 0.75rem;
+}
+
 .footer-social .social-links {
   display: flex;
   justify-content: center;
-  gap: 1rem;
+  gap: 1.25rem;
   margin-top: 1rem;
 }
 
 .footer-social a {
   color: #c9a84c;
   text-decoration: none;
-  transition: opacity 0.3s;
+  transition: color 0.3s, transform 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .footer-social a:hover {
-  opacity: 0.8;
+  color: #f5f0e8;
+  transform: scale(1.15);
 }
 
 .footer-bottom {

@@ -22,17 +22,27 @@
         </li>
       </ul>
 
-      <!-- Botón hamburguesa (móvil) -->
-      <button
-        class="navbar__burger"
-        :aria-expanded="menuOpen"
-        aria-label="Menú de navegación"
-        @click="toggleMenu"
-      >
-        <span class="navbar__burger-bar"></span>
-        <span class="navbar__burger-bar"></span>
-        <span class="navbar__burger-bar"></span>
-      </button>
+      <!-- Carrito + Burger -->
+      <div class="navbar__right">
+        <RouterLink to="/carrito" class="navbar__cart" aria-label="Ver carrito">
+          <ShoppingCart :size="20" />
+          <span v-if="carrito.totalItems > 0" class="navbar__cart-badge">
+            {{ carrito.totalItems }}
+          </span>
+        </RouterLink>
+
+        <!-- Botón hamburguesa (móvil) -->
+        <button
+          class="navbar__burger"
+          :aria-expanded="menuOpen"
+          aria-label="Menú de navegación"
+          @click="toggleMenu"
+        >
+          <span class="navbar__burger-bar"></span>
+          <span class="navbar__burger-bar"></span>
+          <span class="navbar__burger-bar"></span>
+        </button>
+      </div>
 
     </div>
   </nav>
@@ -41,7 +51,10 @@
 <script setup>
   import { ref, onMounted, onUnmounted } from 'vue'
   import { RouterLink } from 'vue-router'
+  import { ShoppingCart } from 'lucide-vue-next'
+  import { useCarritoStore } from '@/stores/carritoStore'
 
+  const carrito = useCarritoStore()
   const menuOpen = ref(false)
   const isScrolled = ref(false)
 
@@ -69,27 +82,21 @@
 </script>
 
 <style scoped>
-  /* ── Variables ── */
-  :root {
-    --nav-height: 70px;
-    --color-dark: #1a1a1a;
-    --color-gold: #c9a84c;
-    --color-light: #f5f0e8;
-  }
-
   /* ── Base ── */
   .navbar {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    z-index: 1000;
-    background: transparent;
+    z-index: 1100;
+    background: rgba(26, 26, 26, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     transition: background 0.3s ease, box-shadow 0.3s ease;
   }
 
   .navbar--scrolled {
-    background: rgba(26, 26, 26, 0.96);
+    background: rgba(26, 26, 26, 0.97);
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
   }
 
@@ -100,7 +107,7 @@
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 1.5rem;
-    height: var(--nav-height, 70px);
+    height: 70px;
   }
 
   /* ── Logo ── */
@@ -150,6 +157,46 @@
   .navbar__link--active {
     color: #c9a84c;
     border-bottom-color: #c9a84c;
+  }
+
+  /* ── Right section (cart + burger) ── */
+  .navbar__right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  /* ── Cart ── */
+  .navbar__cart {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f5f0e8;
+    text-decoration: none;
+    transition: color 0.2s;
+    padding: 4px;
+  }
+
+  .navbar__cart:hover {
+    color: #c9a84c;
+  }
+
+  .navbar__cart-badge {
+    position: absolute;
+    top: -5px;
+    right: -8px;
+    background: #c9a84c;
+    color: #1a1a1a;
+    font-size: 0.65rem;
+    font-weight: 700;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
   }
 
   /* ── Burger ── */

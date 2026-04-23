@@ -63,14 +63,14 @@
               </table>
             </div>
 
-            <a
-              :href="`https://wa.me/523331234567?text=Hola, me interesa el producto: ${producto.nombre}`"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="btn-contacto"
+            <button
+              class="btn-agregar"
+              @click="agregarAlCarrito"
+              :disabled="agregado"
             >
-              Consultar disponibilidad
-            </a>
+              <ShoppingCart :size="18" />
+              {{ agregado ? 'Agregado al carrito' : 'Agregar al carrito' }}
+            </button>
           </div>
         </div>
       </section>
@@ -81,13 +81,24 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { ShoppingCart } from 'lucide-vue-next'
 import { getProductoById } from '@/lib/supabaseClient'
 import { resolveProductImage } from '@/lib/imageHelper'
+import { useCarritoStore } from '@/stores/carritoStore'
 
 const route = useRoute()
+const carrito = useCarritoStore()
 const producto = ref(null)
 const loading = ref(true)
 const error = ref(false)
+const agregado = ref(false)
+
+function agregarAlCarrito() {
+  if (!producto.value) return
+  carrito.agregarProducto(producto.value)
+  agregado.value = true
+  setTimeout(() => { agregado.value = false }, 1500)
+}
 
 const imagenResuelta = computed(() => {
   if (!producto.value) return ''
@@ -137,7 +148,7 @@ onMounted(async () => {
   justify-content: center;
   min-height: 60vh;
   text-align: center;
-  padding: 2rem;
+  padding: 6rem 2rem 2rem;
 }
 
 .spinner {
@@ -175,7 +186,7 @@ onMounted(async () => {
 .detalle-hero {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 3rem 2rem;
+  padding: 6rem 2rem 3rem;
 }
 
 .detalle-grid {
@@ -287,23 +298,31 @@ onMounted(async () => {
   width: 40%;
 }
 
-.btn-contacto {
-  display: inline-block;
+.btn-agregar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   padding: 1rem 2rem;
-  background: #25d366;
+  background: #c9a84c;
   color: white;
-  text-decoration: none;
+  border: none;
   border-radius: 6px;
   font-weight: 700;
   font-size: 1rem;
   text-align: center;
+  cursor: pointer;
   transition: background 0.2s, transform 0.2s;
   letter-spacing: 0.02em;
 }
 
-.btn-contacto:hover {
-  background: #1ebe57;
+.btn-agregar:hover:not(:disabled) {
+  background: #b39340;
   transform: translateY(-2px);
+}
+
+.btn-agregar:disabled {
+  background: #5cb85c;
+  cursor: default;
 }
 
 /* Responsive */

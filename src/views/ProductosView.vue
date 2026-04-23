@@ -88,7 +88,14 @@
                   <p class="product-description">{{ producto.descripcion }}</p>
                   <div class="product-footer">
                     <span class="product-price">{{ formatPrice(producto.precio) }}</span>
-                    <span class="ver-detalle">Ver detalle &rarr;</span>
+                    <button
+                      class="btn-agregar-grid"
+                      @click="agregarDesdeGrid($event, producto)"
+                      aria-label="Agregar al carrito"
+                    >
+                      <ShoppingCart :size="15" />
+                      Agregar
+                    </button>
                   </div>
                 </div>
               </div>
@@ -108,8 +115,18 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { ShoppingCart } from 'lucide-vue-next'
 import { getProductos } from '@/lib/supabaseClient'
 import { resolveProductImage } from '@/lib/imageHelper'
+import { useCarritoStore } from '@/stores/carritoStore'
+
+const carrito = useCarritoStore()
+
+function agregarDesdeGrid(e, producto) {
+  e.preventDefault()
+  e.stopPropagation()
+  carrito.agregarProducto(producto)
+}
 
 const productos = ref([])
 const loading = ref(false)
@@ -479,15 +496,26 @@ onMounted(() => {
   font-family: 'Arial', sans-serif;
 }
 
-.ver-detalle {
-  font-size: 0.85rem;
-  color: #c9a84c;
+
+.btn-agregar-grid {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.9rem;
+  background: #c9a84c;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.8rem;
   font-weight: 600;
-  transition: color 0.2s;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  white-space: nowrap;
 }
 
-.product-card:hover .ver-detalle {
-  color: #b39340;
+.btn-agregar-grid:hover {
+  background: #b39340;
+  transform: scale(1.05);
 }
 
 /* Media Queries */

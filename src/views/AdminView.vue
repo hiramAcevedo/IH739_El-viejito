@@ -377,7 +377,7 @@ onMounted(() => {
 .admin-container {
   min-height: 100vh;
   background-color: #faf7f2;
-  padding: 2rem 1.5rem;
+  padding: 5.5rem 1.5rem 2rem;
 }
 
 .admin-header {
@@ -736,7 +736,7 @@ onMounted(() => {
 
 /* Responsive */
 @media (max-width: 768px) {
-  .admin-container { padding: 1rem; }
+  .admin-container { padding: 5rem 1rem 1rem; }
   .admin-header { flex-direction: column; align-items: stretch; }
   .admin-title { font-size: 1.8rem; }
   .admin-section { padding: 1.25rem; }
