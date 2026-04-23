@@ -42,6 +42,12 @@ const routes = [
     meta: { title: 'Carrito | Tequila El Viejito' }
   },
   {
+    path: '/checkout',
+    name: 'checkout',
+    component: () => import('@/views/CheckoutView.vue'),
+    meta: { title: 'Checkout | Tequila El Viejito' }
+  },
+  {
     path: '/login',
     name: 'login',
     component: () => import('@/views/LoginView.vue'),

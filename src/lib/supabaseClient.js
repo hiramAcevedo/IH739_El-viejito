@@ -80,12 +80,35 @@ export async function deleteProducto(id) {
   if (error) throw error
 }
 
+/** Crea un pedido desde el checkout */
+export async function createPedido(pedido) {
+  const { data, error } = await supabase
+    .from('pedidos')
+    .insert(pedido)
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
 /** Obtiene todos los pedidos (solo admin via RLS) */
 export async function getPedidos() {
   const { data, error } = await supabase
     .from('pedidos')
-    .select('*, productos(nombre)')
+    .select('*')
     .order('created_at', { ascending: false })
+  if (error) throw error
+  return data
+}
+
+/** Actualiza el estado de un pedido */
+export async function updatePedidoEstado(id, estado) {
+  const { data, error } = await supabase
+    .from('pedidos')
+    .update({ estado })
+    .eq('id', id)
+    .select()
+    .single()
   if (error) throw error
   return data
 }
