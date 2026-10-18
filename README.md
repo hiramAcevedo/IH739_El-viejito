@@ -1,6 +1,6 @@
 # Tequila El Viejito — Sistema Web
 
-**Proyecto VII (IH739) | Universidad de Guadalajara — Sistema de Universidad Virtual**
+**Proyecto VIII (IH740) | Universidad de Guadalajara — Sistema de Universidad Virtual**
 
 ![Vue](https://img.shields.io/badge/Vue-3.5-42b883?logo=vue.js&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-5.x-646cff?logo=vite&logoColor=white)
@@ -14,10 +14,9 @@
 
 | Rol | Integrante |
 |-----|------------|
-| Product Owner (PO) | Marcela Lopez Nunez |
-| Scrum Master (SM) | Aritzai Guadalupe Silva Galvan |
-| Developer (DEV) | Hiram Agustin Acevedo Lopez |
-| Developer (DEV) | Arturo Daniel Aguilar Gonzalez |
+| Product Owner (PO) | Marcela López Núñez |
+| Scrum Master (SM) | Arturo Daniel Aguilar González |
+| Developer (DEV) | Hiram Agustín Acevedo López |
 
 **Asesor:** Sergio Ulises Lillingston Perez
 
@@ -130,8 +129,8 @@ Roles: `admin`, `superadmin`.
 
 ```bash
 # 1. Clonar el repositorio
-git clone https://github.com/hiramAcevedo/IH739_El-viejito.git
-cd IH739_El-viejito
+git clone https://github.com/aliyatdev/IH739-IH740_website_El-viejito.git
+cd IH739-IH740_website_El-viejito
 
 # 2. Instalar dependencias
 npm install
@@ -160,7 +159,7 @@ npm run dev
 ## Estructura del proyecto
 
 ```
-IH739_El-viejito/
+IH739-IH740_website_El-viejito/
 ├── src/
 │   ├── assets/                     # Imagenes optimizadas (.webp)
 │   ├── components/
@@ -209,7 +208,7 @@ Este proyecto sigue el flujo **fork → branch → pull request**.
 
 ```bash
 # 1. Fork del repositorio y clonar
-git clone https://github.com/TU_USUARIO/IH739_El-viejito.git
+git clone https://github.com/TU_USUARIO/IH739-IH740_website_El-viejito.git
 
 # 2. Crear branch desde el sprint actual
 git switch -c sprint-7-tu-nombre
