@@ -18,7 +18,7 @@
 | Scrum Master (SM) | Arturo Daniel Aguilar González |
 | Developer (DEV) | Hiram Agustín Acevedo López |
 
-**Asesor:** Sergio Ulises Lillingston Perez
+**Asesora:** Úrsula del Pilar González Robles
 
 ---
 
@@ -211,12 +211,12 @@ Este proyecto sigue el flujo **fork → branch → pull request**.
 git clone https://github.com/TU_USUARIO/IH739-IH740_website_El-viejito.git
 
 # 2. Crear branch desde el sprint actual
-git switch -c sprint-7-tu-nombre
+git switch -c proyecto-viii-tu-nombre
 
 # 3. Desarrollar, commitear y subir
 git add .
-git commit -m "Sprint 7: descripcion de lo que hiciste"
-git push origin sprint-7-tu-nombre
+git commit -m "Sprint 1: descripcion de lo que hiciste"
+git push origin proyecto-viii-tu-nombre
 
 # 4. Abrir Pull Request hacia main
 ```
