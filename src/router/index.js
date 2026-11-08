@@ -113,7 +113,10 @@ const routes = [
   },
   // Página de muestra de los componentes compartidos: sólo en el servidor de desarrollo
   ...(import.meta.env.DEV
-    ? [{ path: '/componentes', name: 'componentes', component: () => import('@/views/ComponentesView.vue'), meta: { title: 'Componentes | Tequila El Viejito' } }]
+    ? [
+        { path: '/componentes', name: 'componentes', component: () => import('@/views/ComponentesView.vue'), meta: { title: 'Componentes | Tequila El Viejito' } },
+        { path: '/correos', name: 'correos', component: () => import('@/views/CorreosView.vue'), meta: { title: 'Correos | Tequila El Viejito' } }
+      ]
     : []),
   {
     // Catch-all: redirige rutas desconocidas al home
