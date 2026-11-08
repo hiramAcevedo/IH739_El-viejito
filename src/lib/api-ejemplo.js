@@ -111,8 +111,7 @@ const datos = {
   usuarios: [
     { id: 'u-1', nombre: 'Hiram Acevedo', email: 'hiram@example.com', rol: 'superadmin', estado: 'activo' },
     { id: 'u-2', nombre: 'Marcela López', email: 'marcela@example.com', rol: 'admin', estado: 'activo' },
-    { id: 'u-3', nombre: 'Arturo Aguilar', email: 'arturo@example.com', rol: 'admin', estado: 'invitado', vence: '2026-11-13T23:59:00-06:00', liga: '/admin/registro?invitacion=inv-ejemplo-7Q2F' },
-    { id: 'u-4', nombre: 'Ventas Tototlán', email: 'ventas@example.com', rol: 'admin', estado: 'apagado' }
+    { id: 'u-3', nombre: 'Ventas Tototlán', email: 'ventas@example.com', rol: 'admin', estado: 'apagado' }
   ],
   invitaciones: {
     'inv-ejemplo-7Q2F': { nombre: 'Arturo Aguilar', email: 'arturo@example.com', rol: 'admin', vence: '2026-11-13T23:59:00-06:00', usada: false },
@@ -269,8 +268,9 @@ export async function responder(metodo, ruta, cuerpo = {}, token) {
     return {}
   }
   if (es('POST', '/admin/invitaciones/')) {
-    const clave = `inv-ejemplo-${datos.usuarios.length + 1}K8M`
-    const vence = new Date(Date.now() + 5 * 24 * 3600 * 1000).toISOString()
+    // la primera invitación de la sesión es la de los bocetos de la 2.3; las siguientes llevan otra clave
+    const clave = datos.usuarios.some((u) => u.liga?.includes('7Q2F')) ? `inv-ejemplo-${datos.usuarios.length + 1}K8M` : 'inv-ejemplo-7Q2F'
+    const vence = '2026-11-13T23:59:00-06:00'
     datos.invitaciones[clave] = { nombre: cuerpo.nombre, email: cuerpo.email, rol: 'admin', vence, usada: false }
     datos.usuarios.push({ id: `u-${datos.usuarios.length + 1}`, nombre: cuerpo.nombre, email: cuerpo.email, rol: 'admin', estado: 'invitado', vence, liga: `/admin/registro?invitacion=${clave}` })
     return { liga: `/admin/registro?invitacion=${clave}`, vence }

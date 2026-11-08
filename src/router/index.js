@@ -99,6 +99,13 @@ const routes = [
     meta: { title: 'Login | Tequila El Viejito' }
   },
   {
+    // La liga de invitación que genera el superadministrador: pública, la valida la API
+    path: '/admin/registro',
+    name: 'registro-invitacion',
+    component: () => import('@/views/RegistroInvitacionView.vue'),
+    meta: { title: 'Crea tu cuenta | Tequila El Viejito' }
+  },
+  {
     path: '/admin',
     name: 'admin',
     component: () => import('@/views/AdminView.vue'),

@@ -1,12 +1,26 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { supabase } from '@/lib/supabaseClient'
+import { MODO_EJEMPLO } from '@/lib/api'
+
+/**
+ * Sesión de ejemplo del panel: sólo existe en el servidor de desarrollo con VITE_API_EJEMPLO=1 (actividad 3.2).
+ * La sesión real es la de Supabase Auth, y en cada operación la API valida el token, la cuenta activa y el rol.
+ */
+const SESION_EJEMPLO = {
+  user: { id: 'u-1', email: 'hiram@example.com' },
+  nombre: 'Hiram Acevedo',
+  rol: 'superadmin'
+}
 
 export const useAuthStore = defineStore('auth', () => {
   // State
   const user = ref(null)
   const loading = ref(false)
   const isAdmin = ref(false)
+  const nombre = ref('')
+  const rol = ref('')
+  const esSuperadmin = computed(() => rol.value === 'superadmin')
 
   /**
    * Login with email and password
@@ -52,6 +66,8 @@ export const useAuthStore = defineStore('auth', () => {
 
       isAdmin.value = true
       user.value = data.user
+      nombre.value = adminData.nombre
+      rol.value = adminData.rol
       return { success: true }
     } catch (err) {
       console.error('Login error:', err)
@@ -66,6 +82,11 @@ export const useAuthStore = defineStore('auth', () => {
    * @returns {Promise<{success: boolean, error?: string}>}
    */
   async function logout() {
+    if (MODO_EJEMPLO) {
+      user.value = null
+      isAdmin.value = false
+      return { success: true }
+    }
     try {
       loading.value = true
 
@@ -93,6 +114,13 @@ export const useAuthStore = defineStore('auth', () => {
    * @returns {Promise<boolean>}
    */
   async function checkAuth() {
+    if (MODO_EJEMPLO) {
+      user.value = SESION_EJEMPLO.user
+      nombre.value = SESION_EJEMPLO.nombre
+      rol.value = SESION_EJEMPLO.rol
+      isAdmin.value = true
+      return true
+    }
     try {
       loading.value = true
 
@@ -121,6 +149,8 @@ export const useAuthStore = defineStore('auth', () => {
       }
 
       isAdmin.value = !!adminData
+      nombre.value = adminData?.nombre || ''
+      rol.value = adminData?.rol || ''
       return true
     } catch (err) {
       console.error('CheckAuth error:', err)
@@ -132,11 +162,22 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  /** El token que el panel manda a la API en cada operación. */
+  async function token() {
+    if (MODO_EJEMPLO) return 'token-de-ejemplo'
+    const { data } = await supabase.auth.getSession()
+    return data.session?.access_token || null
+  }
+
   return {
     // State
     user,
     loading,
     isAdmin,
+    nombre,
+    rol,
+    esSuperadmin,
+    token,
     // Actions
     login,
     logout,
