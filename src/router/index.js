@@ -59,6 +59,10 @@ const routes = [
     component: () => import('@/views/AdminView.vue'),
     meta: { title: 'Panel de Administración | Tequila El Viejito', requiresAuth: true }
   },
+  // Página de muestra de los componentes compartidos: sólo en el servidor de desarrollo
+  ...(import.meta.env.DEV
+    ? [{ path: '/componentes', name: 'componentes', component: () => import('@/views/ComponentesView.vue'), meta: { title: 'Componentes | Tequila El Viejito' } }]
+    : []),
   {
     // Catch-all: redirige rutas desconocidas al home
     path: '/:pathMatch(.*)*',

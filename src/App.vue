@@ -2,6 +2,7 @@
   <NavBar />
   <RouterView />
   <AppFooter />
+  <AvisoEjemplo />
   
   <a
     href="https://wa.me/5213312345678"
@@ -19,6 +20,7 @@
 <script setup>
   import NavBar from '@/components/NavBar.vue'
   import AppFooter from '@/components/AppFooter.vue'
+  import AvisoEjemplo from '@/components/compartidos/AvisoEjemplo.vue'
   import { RouterView } from 'vue-router'
 </script>
 
