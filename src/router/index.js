@@ -80,6 +80,19 @@ const routes = [
     meta: { title: 'Tu pedido | Tequila El Viejito' }
   },
   {
+    // Avisos legales: el texto lo da la API y se edita desde el panel
+    path: '/privacidad',
+    name: 'privacidad',
+    component: () => import('@/views/LegalView.vue'),
+    meta: { title: 'Aviso de privacidad | Tequila El Viejito', clave: 'privacidad' }
+  },
+  {
+    path: '/terminos',
+    name: 'terminos',
+    component: () => import('@/views/LegalView.vue'),
+    meta: { title: 'Términos de venta | Tequila El Viejito', clave: 'terminos' }
+  },
+  {
     path: '/login',
     name: 'login',
     component: () => import('@/views/LoginView.vue'),
