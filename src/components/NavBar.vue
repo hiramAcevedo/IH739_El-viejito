@@ -62,7 +62,8 @@
     { name: 'home',      path: '/',          label: 'Inicio'    },
     { name: 'nosotros',  path: '/nosotros',  label: 'Nosotros'  },
     { name: 'productos', path: '/productos', label: 'Productos' },
-    { name: 'contacto',  path: '/contacto',  label: 'Contacto'  }
+    { name: 'contacto',  path: '/contacto',  label: 'Contacto'  },
+    { name: 'seguimiento', path: '/seguimiento', label: 'Rastrear pedido' }
   ]
 
   function toggleMenu() {

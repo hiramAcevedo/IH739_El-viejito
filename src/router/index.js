@@ -67,6 +67,19 @@ const routes = [
     meta: { title: 'No se pudo cobrar | Tequila El Viejito' }
   },
   {
+    // Seguimiento sin cuenta: correo y folio, o la liga firmada del correo de confirmación
+    path: '/seguimiento',
+    name: 'seguimiento',
+    component: () => import('@/views/SeguimientoView.vue'),
+    meta: { title: 'Rastrear pedido | Tequila El Viejito' }
+  },
+  {
+    path: '/seguimiento/:folio',
+    name: 'seguimiento-detalle',
+    component: () => import('@/views/SeguimientoDetalleView.vue'),
+    meta: { title: 'Tu pedido | Tequila El Viejito' }
+  },
+  {
     path: '/login',
     name: 'login',
     component: () => import('@/views/LoginView.vue'),
