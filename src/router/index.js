@@ -48,6 +48,25 @@ const routes = [
     meta: { title: 'Checkout | Tequila El Viejito' }
   },
   {
+    // Las tres pantallas de regreso de la pasarela comparten la vista: el estado lo dice la API, no la ruta
+    path: '/pago/confirmado',
+    name: 'pago-confirmado',
+    component: () => import('@/views/RegresoPagoView.vue'),
+    meta: { title: 'Pago confirmado | Tequila El Viejito' }
+  },
+  {
+    path: '/pago/pendiente',
+    name: 'pago-pendiente',
+    component: () => import('@/views/RegresoPagoView.vue'),
+    meta: { title: 'Pago pendiente | Tequila El Viejito' }
+  },
+  {
+    path: '/pago/error',
+    name: 'pago-error',
+    component: () => import('@/views/RegresoPagoView.vue'),
+    meta: { title: 'No se pudo cobrar | Tequila El Viejito' }
+  },
+  {
     path: '/login',
     name: 'login',
     component: () => import('@/views/LoginView.vue'),
