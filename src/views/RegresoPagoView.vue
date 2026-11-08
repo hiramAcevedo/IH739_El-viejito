@@ -43,7 +43,8 @@
         <h1>El cobro no se completó</h1>
         <p class="regreso__texto">La sesión de pago venció o el banco no autorizó el cargo. Tu carrito sigue igual.</p>
         <ResumenPedido :cotizacion="datos" titulo="" compacto />
-        <BotonPrimario to="/checkout" bloque>Intentar de nuevo</BotonPrimario>
+        <BotonPrimario bloque :cargando="reintentando" @click="reintentar">Intentar de nuevo</BotonPrimario>
+        <p v-if="errorReintento" class="regreso__pie" role="alert">{{ errorReintento }}</p>
         <BotonPrimario to="/carrito" variante="secundario" bloque>Volver al carrito</BotonPrimario>
       </template>
     </div>
@@ -59,7 +60,7 @@
  */
 import { ref, watch } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
-import { consultarRegreso } from '@/lib/api'
+import { consultarRegreso, abrirSesionPago } from '@/lib/api'
 import { formatoFechaHora } from '@/lib/formato'
 import { useCarritoStore } from '@/stores/carritoStore'
 import BotonPrimario from '@/components/compartidos/BotonPrimario.vue'
@@ -109,6 +110,27 @@ async function revisar() {
 }
 
 watch(() => route.query.session_id, revisar, { immediate: true })
+
+/**
+ * Intentar de nuevo: el mismo pedido abre otra sesión de pago (otro intento en pagos), sin crear un pedido nuevo.
+ * Si el navegador ya no tiene el pedido en curso, se vuelve al checkout.
+ */
+const reintentando = ref(false)
+const errorReintento = ref('')
+async function reintentar() {
+  const enCurso = JSON.parse(sessionStorage.getItem('pedido-en-curso') || 'null')
+  if (!enCurso) return router.push('/checkout')
+  reintentando.value = true
+  errorReintento.value = ''
+  try {
+    const sesion = await abrirSesionPago(enCurso.id)
+    if (sesion.url.startsWith('/')) router.push(sesion.url)
+    else window.location.assign(sesion.url)
+  } catch (e) {
+    errorReintento.value = e.message || 'No pudimos abrir otra sesión de pago.'
+    reintentando.value = false
+  }
+}
 </script>
 
 <style scoped>
