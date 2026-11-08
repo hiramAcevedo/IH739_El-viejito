@@ -5,7 +5,7 @@
 ![Vue](https://img.shields.io/badge/Vue-3.5-42b883?logo=vue.js&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-5.x-646cff?logo=vite&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ecf8e?logo=supabase&logoColor=white)
-![Sprint](https://img.shields.io/badge/Sprint-7%20de%207-success)
+![Sprint](https://img.shields.io/badge/Proyecto%20VIII-sprint%204-c9a84c)
 ![License](https://img.shields.io/badge/Licencia-MIT-blue)
 
 ---
@@ -33,6 +33,36 @@
 | Iconos | lucide-vue-next | Iconografia SVG consistente |
 | Slider | Swiper.js 11 | Carrusel de productos responsive |
 | Calidad de codigo | ESLint + Prettier | Analisis estatico y formato |
+
+---
+
+## Proyecto VIII: el frontend del cobro (rama `sprint-4-hiram`)
+
+El sitio deja de decidir el importe. El carrito y el checkout ya no calculan el IVA ni el total en el navegador, ni
+escriben el pedido en Supabase: piden la cotización a la API de pedidos y pagos
+([IH740_api_El-viejito](https://github.com/hiramAcevedo/IH740_api_El-viejito)), que calcula con los precios de la base,
+registra el pedido y abre la sesión de cobro con la pasarela. El contrato está en `src/lib/api.js`.
+
+| Función del sitio | Ruta de la API | Para qué |
+|---|---|---|
+| `calcularPedido` | `POST /pedidos/calcular/` | El total del carrito con los precios vigentes |
+| `crearPedido` | `POST /pedidos/crear/` | El pedido con la dirección y la confirmación de edad |
+| `abrirSesionPago` | `POST /pagos/sesion/` | La sesión de cobro y la página de pago |
+| `consultarRegreso` | `GET /pagos/regreso/` | El estado al volver: confirmado, pendiente o no se pudo cobrar |
+| `consultarSeguimiento` | `POST /pedidos/seguimiento/` | Rastrear pedido con correo y folio |
+| `leerTextoLegal` | `GET /legal/{clave}/` | Aviso de privacidad, términos y leyenda |
+| Panel (con la sesión) | `/admin/...` | Pedidos con el estado del pago, envíos, pagos, legal, usuarios e invitaciones |
+
+**Lo nuevo en la interfaz:** variables de diseño en `src/styles/variables.css` con el contraste corregido (texto casi
+negro sobre el dorado, 7.6:1); los componentes compartidos de `src/components/compartidos/`; las pantallas
+`/pago/confirmado`, `/pago/pendiente` y `/pago/error`; `/seguimiento` y su detalle; `/privacidad` y `/terminos`; en el
+panel, Pedidos en tabla con el estado del pago de sólo lectura, Envíos, Pagos, Legal, Usuarios y
+`/admin/registro` para las invitaciones; y las plantillas de los tres correos en `correos/`.
+
+**Modo de ejemplo.** Mientras la API no está conectada, con `VITE_API_EJEMPLO=1` el servidor de desarrollo responde desde
+`src/lib/api-ejemplo.js`, que imita a la API con datos de ejemplo, y abre el panel con una sesión de ejemplo. Sólo existe
+en `npm run dev`: el build de producción no incluye ni el módulo, ni la sesión, ni las páginas de muestra
+(`/componentes` y `/correos`).
 
 ---
 
@@ -105,7 +135,11 @@ Roles: `admin`, `superadmin`.
 | `pedidos` | DELETE | Nadie (preserva audit trail) |
 | `usuarios_admin` | SELECT | Solo el propio usuario (`auth.uid()`) |
 
-> El cliente publico nunca recibe filas de `pedidos` de vuelta tras un INSERT: el id se genera con `crypto.randomUUID()` antes de mandar la peticion, evitando la necesidad de una policy de SELECT para `anon`.
+> Proyecto VII: el cliente publico nunca recibe filas de `pedidos` de vuelta tras un INSERT: el id se genera con `crypto.randomUUID()` antes de mandar la peticion, evitando la necesidad de una policy de SELECT para `anon`.
+>
+> Proyecto VIII: en la rama `sprint-4-hiram` el sitio ya no inserta pedidos; los registra la API. La politica de INSERT
+> anonimo sigue mientras el checkout de produccion sea el de Proyecto VII, y se retira en el mismo despliegue que active
+> el checkout nuevo.
 
 ---
 
@@ -153,6 +187,8 @@ npm run dev
 |----------|-------------|
 | `VITE_SUPABASE_URL` | URL del proyecto en Supabase |
 | `VITE_SUPABASE_ANON_KEY` | Llave publica (anon key) de Supabase |
+| `VITE_API_URL` | Direccion de la API de pedidos y pagos en cada entorno (en local, `http://127.0.0.1:8000/api`) |
+| `VITE_API_EJEMPLO` | `1` para responder con el modulo de ejemplo en `npm run dev`; sin la variable, el sitio llama a la API |
 
 ---
 
@@ -163,11 +199,21 @@ IH739-IH740_website_El-viejito/
 ├── src/
 │   ├── assets/                     # Imagenes optimizadas (.webp)
 │   ├── components/
-│   │   ├── NavBar.vue              # Navegacion responsive con carrito
-│   │   └── AppFooter.vue           # Footer con iconos de redes sociales
+│   │   ├── NavBar.vue              # Navegacion responsive con carrito y Rastrear pedido
+│   │   ├── AppFooter.vue           # Footer con redes, avisos legales y leyenda de venta a mayores
+│   │   ├── compartidos/            # BotonPrimario, ResumenPedido, ConfirmacionEdad, SelectorEntrega,
+│   │   │                           # EstadoPago, LineaSeguimiento, FormularioSeguimiento
+│   │   └── panel/                  # Pedidos, Envios, Pagos, Legal y Usuarios del panel
+│   ├── composables/
+│   │   └── useCotizacion.js        # La cotizacion del carrito pedida a la API
 │   ├── lib/
-│   │   ├── supabaseClient.js       # Cliente Supabase + helpers CRUD
+│   │   ├── api.js                  # El contrato con la API de pedidos y pagos
+│   │   ├── api-ejemplo.js          # Modulo de ejemplo (solo en desarrollo)
+│   │   ├── formato.js              # Moneda y fechas en es-MX
+│   │   ├── supabaseClient.js       # Cliente Supabase: catalogo, productos y sesion del panel
 │   │   └── imageHelper.js          # Resolucion de assets via import.meta.glob
+│   ├── styles/
+│   │   └── variables.css           # Variables de diseno: colores, tipografias y espacios
 │   ├── router/
 │   │   └── index.js                # Vue Router — rutas con lazy-loading y guards
 │   ├── stores/
@@ -180,12 +226,20 @@ IH739-IH740_website_El-viejito/
 │   │   ├── ProductosView.vue       # Catalogo con filtros por tipo y precio
 │   │   ├── ProductoDetalleView.vue # Vista detalle del producto
 │   │   ├── ContactoView.vue        # Formulario de contacto + mapa
-│   │   ├── CarritoView.vue         # Vista del carrito de compras
-│   │   ├── CheckoutView.vue        # Formulario de checkout con resumen
+│   │   ├── CarritoView.vue         # Carrito con el importe que calcula la API
+│   │   ├── CheckoutView.vue        # Checkout con direccion, confirmacion de edad y Pagar
+│   │   ├── RegresoPagoView.vue     # /pago/confirmado, /pago/pendiente y /pago/error
+│   │   ├── SeguimientoView.vue     # Rastrear pedido con correo y folio
+│   │   ├── SeguimientoDetalleView.vue # Detalle con la linea de estados
+│   │   ├── LegalView.vue           # /privacidad y /terminos
+│   │   ├── RegistroInvitacionView.vue # /admin/registro
 │   │   ├── LoginView.vue           # Login administrativo
-│   │   └── AdminView.vue           # Panel admin: productos y pedidos
+│   │   ├── AdminView.vue           # Panel admin: dashboard, productos y las secciones del panel
+│   │   ├── ComponentesView.vue     # Pagina de muestra (solo en desarrollo)
+│   │   └── CorreosView.vue         # Vista previa de los correos (solo en desarrollo)
 │   ├── App.vue                     # Layout principal + WhatsApp float
 │   └── main.js                     # Entry point
+├── correos/                        # Plantillas de los tres correos del pedido
 ├── supabase_schema_sprint1.sql     # Schema BD inicial
 ├── .env.example                    # Plantilla de variables de entorno
 ├── vite.config.js
@@ -196,7 +250,8 @@ IH739-IH740_website_El-viejito/
 
 ## Despliegue
 
-El sitio esta desplegado en Vercel con deploys automaticos desde la rama `main`.
+El sitio esta desplegado en Vercel con deploys automaticos desde la rama `main`. Las ramas de sprint se publican en
+su vista previa y vuelven a `main` cuando la Product Owner las aprueba.
 
 **Produccion:** https://ih739el-viejito.vercel.app
 
@@ -210,13 +265,13 @@ Este proyecto sigue el flujo **fork → branch → pull request**.
 # 1. Fork del repositorio y clonar
 git clone https://github.com/TU_USUARIO/IH739-IH740_website_El-viejito.git
 
-# 2. Crear branch desde el sprint actual
-git switch -c proyecto-viii-tu-nombre
+# 2. Crear la rama del sprint
+git switch -c sprint-4-tu-nombre
 
 # 3. Desarrollar, commitear y subir
-git add .
-git commit -m "Sprint 1: descripcion de lo que hiciste"
-git push origin proyecto-viii-tu-nombre
+git add src/
+git commit -m "feat: descripcion de lo que hiciste"
+git push origin sprint-4-tu-nombre
 
 # 4. Abrir Pull Request hacia main
 ```
