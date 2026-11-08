@@ -1,10 +1,13 @@
 <template>
-  <p v-if="MODO_EJEMPLO" class="aviso-ejemplo" role="note">Datos de ejemplo</p>
+  <p v-if="visible" class="aviso-ejemplo" role="note">Datos de ejemplo</p>
 </template>
 
 <script setup>
-/** Marca visible del modo de ejemplo: sólo aparece en el servidor de desarrollo con VITE_API_EJEMPLO=1. */
-import { MODO_EJEMPLO } from '@/lib/api'
+/**
+ * Marca visible del modo de ejemplo: sólo aparece en el servidor de desarrollo con VITE_API_EJEMPLO=1.
+ * La condición se escribe aquí y no se importa, para que el build de producción la resuelva y quite la marca.
+ */
+const visible = import.meta.env.DEV && import.meta.env.VITE_API_EJEMPLO === '1'
 </script>
 
 <style scoped>

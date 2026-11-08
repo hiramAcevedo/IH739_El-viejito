@@ -2,7 +2,7 @@
   <NavBar />
   <RouterView />
   <AppFooter />
-  <AvisoEjemplo />
+  <component :is="AvisoEjemplo" v-if="AvisoEjemplo" />
   
   <a
     href="https://wa.me/5213312345678"
@@ -20,7 +20,12 @@
 <script setup>
   import NavBar from '@/components/NavBar.vue'
   import AppFooter from '@/components/AppFooter.vue'
-  import AvisoEjemplo from '@/components/compartidos/AvisoEjemplo.vue'
+  import { defineAsyncComponent } from 'vue'
+
+  // la marca de datos de ejemplo sólo existe en el servidor de desarrollo; el build de producción ni la importa
+  const AvisoEjemplo = import.meta.env.DEV && import.meta.env.VITE_API_EJEMPLO === '1'
+    ? defineAsyncComponent(() => import('@/components/compartidos/AvisoEjemplo.vue'))
+    : null
   import { RouterView } from 'vue-router'
 </script>
 
