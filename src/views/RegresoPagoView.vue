@@ -7,6 +7,16 @@
         <p class="regreso__texto">Le preguntamos al sistema en qué estado quedó tu pedido.</p>
       </template>
 
+      <template v-else-if="estado === 'confirmando'">
+        <EstadoPago estado="confirmando" forma="larga" />
+        <h1>Confirmando tu pago</h1>
+        <p class="regreso__folio-etiqueta">Folio</p>
+        <p class="regreso__folio">#{{ datos.folio }}</p>
+        <p class="regreso__texto">La pasarela ya aprobó el cargo; falta que su aviso llegue al sistema. Esta pantalla se
+          actualiza sola.</p>
+        <ResumenPedido :cotizacion="datos" titulo="" compacto />
+      </template>
+
       <template v-else-if="fallo">
         <h1>No encontramos ese pago</h1>
         <p class="regreso__texto">{{ fallo }}</p>
@@ -58,7 +68,7 @@
  * que ella responde. Si la ruta no coincide con ese estado, pasan a la que sí. El carrito se vacía sólo con el pago
  * confirmado.
  */
-import { ref, watch } from 'vue'
+import { ref, watch, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { consultarRegreso, abrirSesionPago } from '@/lib/api'
 import { formatoFechaHora } from '@/lib/formato'
@@ -75,16 +85,29 @@ const fallo = ref('')
 const datos = ref(null)
 const estado = ref('')
 
-const PANTALLA = { confirmado: 'pago-confirmado', pendiente: 'pago-pendiente', error: 'pago-error' }
+const PANTALLA = { confirmado: 'pago-confirmado', confirmando: 'pago-confirmado', pendiente: 'pago-pendiente', error: 'pago-error' }
 
 function estadoDe(respuesta) {
-  if (respuesta.pago === 'paid') return 'confirmado'
-  if (respuesta.estado_sesion === 'expired') return 'error'
+  // confirmado sólo cuando la base ya tiene el pago: lo escribe el aviso de la pasarela, no el regreso del comprador
+  if (respuesta.estado_pago === 'pagado') return 'confirmado'
+  if (respuesta.pago === 'paid') return 'confirmando'
+  if (respuesta.estado_sesion === 'expired' || respuesta.estado_pago === 'rechazado') return 'error'
   return 'pendiente' // sesión abierta, o completa con el pago en camino
 }
 
+// mientras el aviso no llega, la pantalla vuelve a preguntar cada 2 segundos, hasta un minuto
+let intentos = 0
+let espera = null
+function seguirPreguntando() {
+  clearTimeout(espera)
+  if (estado.value === 'confirmando' && intentos < 30) {
+    intentos += 1
+    espera = setTimeout(revisar, 2000)
+  }
+}
+
 async function revisar() {
-  cargando.value = true
+  cargando.value = !datos.value
   fallo.value = ''
   const sesion = route.query.session_id
   if (!sesion) {
@@ -102,6 +125,7 @@ async function revisar() {
       carrito.vaciarCarrito()
       sessionStorage.removeItem('pedido-en-curso')
     }
+    seguirPreguntando()
   } catch (e) {
     fallo.value = e.message || 'No pudimos revisar el pago.'
   } finally {
@@ -110,6 +134,7 @@ async function revisar() {
 }
 
 watch(() => route.query.session_id, revisar, { immediate: true })
+onBeforeUnmount(() => clearTimeout(espera))
 
 /**
  * Intentar de nuevo: el mismo pedido abre otra sesión de pago (otro intento en pagos), sin crear un pedido nuevo.

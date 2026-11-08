@@ -33,10 +33,13 @@
         <p v-if="cargandoEventos" class="panel-nota">Cargando avisos…</p>
         <p v-else-if="!eventos.length" class="panel-nota">Este intento todavía no recibe avisos.</p>
         <ol v-else class="eventos__lista">
-          <li v-for="(e, i) in eventos" :key="i" :class="{ duplicado: !e.aplicado }">
+          <li v-for="(e, i) in eventos" :key="i" :class="{ duplicado: e.repeticiones > 0 }">
             <span class="mono">{{ e.tipo }}</span>
             <small>{{ formatoFechaHora(e.recibido) }} · clave {{ e.clave }}</small>
-            <strong>{{ e.aplicado ? 'Aplicado' : 'Repetido: no se aplicó otra vez' }}</strong>
+            <strong>Aplicado una vez</strong>
+            <strong v-if="e.repeticiones > 0" class="repetido">
+              Llegó {{ e.repeticiones === 1 ? 'una vez más' : `${e.repeticiones} veces más` }}: no se aplicó otra vez
+            </strong>
           </li>
         </ol>
       </aside>
@@ -116,6 +119,7 @@ onMounted(async () => {
 .eventos__lista li.duplicado { border-left-color: var(--color-aviso); }
 .eventos__lista small { color: var(--color-texto-2); }
 .eventos__lista strong { font-size: 0.85rem; color: var(--color-texto); }
+.eventos__lista .repetido { color: var(--color-aviso); }
 @media (min-width: 1100px) { .pagos { grid-template-columns: 1.6fr 1fr; } }
 @media (max-width: 600px) { .panel-seccion { padding: var(--espacio-4); } }
 </style>

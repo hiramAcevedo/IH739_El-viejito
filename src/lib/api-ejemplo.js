@@ -78,9 +78,8 @@ const datos = {
   ],
   eventos: {
     'pg-4': [
-      { recibido: '2026-11-05T10:26:02-06:00', tipo: 'checkout.session.completed', clave: 'evt_ejemplo_4a', aplicado: true },
-      { recibido: '2026-11-05T10:26:03-06:00', tipo: 'payment_intent.succeeded', clave: 'evt_ejemplo_4b', aplicado: true },
-      { recibido: '2026-11-05T10:31:40-06:00', tipo: 'checkout.session.completed', clave: 'evt_ejemplo_4a', aplicado: false }
+      { recibido: '2026-11-05T10:26:02-06:00', tipo: 'checkout.session.completed', clave: 'evt_ejemplo_4a', aplicado: true, repeticiones: 1 },
+      { recibido: '2026-11-05T10:26:03-06:00', tipo: 'payment_intent.succeeded', clave: 'evt_ejemplo_4b', aplicado: true, repeticiones: 0 }
     ],
     'pg-6': [{ recibido: '2026-11-07T18:14:10-06:00', tipo: 'checkout.session.completed', clave: 'evt_ejemplo_6a', aplicado: true }],
     'pg-3': [{ recibido: '2026-11-04T17:07:21-06:00', tipo: 'checkout.session.completed', clave: 'evt_ejemplo_3a', aplicado: true }],
@@ -127,11 +126,11 @@ function sesionDeEjemplo(id) {
     ...totales([linea('Reposado Suave', 450, 2), linea('Añejo Premium', 680, 1)])
   }
   const base = { folio: p.folio, sesion: id, importe: p.total, lineas: p.lineas, subtotal: p.subtotal, iva: p.iva, envio: p.envio, total: p.total }
-  if (id === 'cs_ejemplo_pagada') return { ...base, estado_sesion: 'complete', pago: 'paid' }
+  if (id === 'cs_ejemplo_pagada') return { ...base, estado_sesion: 'complete', pago: 'paid', estado_pago: 'pagado' }
   if (id === 'cs_ejemplo_abierta') {
-    return { ...base, estado_sesion: 'open', pago: 'unpaid', url: '/pago/confirmado?session_id=cs_ejemplo_pagada', vence: '2026-11-09T18:30:00-06:00' }
+    return { ...base, estado_sesion: 'open', pago: 'unpaid', estado_pago: 'pendiente', url: '/pago/confirmado?session_id=cs_ejemplo_pagada', vence: '2026-11-09T18:30:00-06:00' }
   }
-  if (id === 'cs_ejemplo_caducada') return { ...base, estado_sesion: 'expired', pago: 'unpaid' }
+  if (id === 'cs_ejemplo_caducada') return { ...base, estado_sesion: 'expired', pago: 'unpaid', estado_pago: 'pendiente' }
   return null
 }
 
