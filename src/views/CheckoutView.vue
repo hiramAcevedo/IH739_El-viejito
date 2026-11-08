@@ -208,7 +208,7 @@ async function enviarPedido() {
 
 <style scoped>
 .checkout-page {
-  background-color: #faf7f2;
+  background-color: var(--color-crema);
   min-height: 100vh;
   padding: 6rem 2rem 4rem;
 }
@@ -219,9 +219,9 @@ async function enviarPedido() {
 }
 
 .checkout-titulo {
-  font-family: Georgia, serif;
+  font-family: var(--fuente-titulos);
   font-size: 2.2rem;
-  color: #1a1a1a;
+  color: var(--color-texto);
   margin-bottom: 2rem;
 }
 
@@ -233,14 +233,14 @@ async function enviarPedido() {
   gap: 1.5rem;
   padding: 5rem 2rem;
   text-align: center;
-  color: #888;
+  color: var(--color-texto-2);
 }
 
 .btn-catalogo {
   display: inline-block;
   padding: 0.85rem 2rem;
-  background: #c9a84c;
-  color: white;
+  background: var(--color-dorado);
+  color: var(--color-texto);
   text-decoration: none;
   border-radius: 6px;
   font-weight: 600;
@@ -248,7 +248,7 @@ async function enviarPedido() {
 }
 
 .btn-catalogo:hover {
-  background: #b39340;
+  background: var(--color-dorado-hover);
 }
 
 /* Éxito */
@@ -262,19 +262,19 @@ async function enviarPedido() {
 }
 
 .checkout-exito h1 {
-  font-family: Georgia, serif;
-  color: #1a1a1a;
+  font-family: var(--fuente-titulos);
+  color: var(--color-texto);
   font-size: 2rem;
 }
 
 .checkout-exito p {
-  color: #555;
+  color: var(--color-texto-2);
   max-width: 480px;
   line-height: 1.6;
 }
 
 .exito-folio {
-  background: #f5f0e8;
+  background: var(--color-crema-oscuro);
   padding: 0.75rem 1.5rem;
   border-radius: 6px;
   font-size: 0.95rem;
@@ -297,9 +297,9 @@ async function enviarPedido() {
 }
 
 .checkout-form h2 {
-  font-family: Georgia, serif;
+  font-family: var(--fuente-titulos);
   font-size: 1.15rem;
-  color: #1a1a1a;
+  color: var(--color-texto);
   margin: 1.5rem 0 1rem;
 }
 
@@ -315,7 +315,7 @@ async function enviarPedido() {
   display: block;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #555;
+  color: var(--color-texto-2);
   margin-bottom: 0.4rem;
 }
 
@@ -328,13 +328,13 @@ async function enviarPedido() {
   font-size: 0.95rem;
   font-family: inherit;
   transition: border-color 0.2s;
-  background: #faf7f2;
+  background: var(--color-crema);
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #c9a84c;
+  border-color: var(--color-dorado);
 }
 
 .form-row {
@@ -356,7 +356,7 @@ async function enviarPedido() {
   align-items: center;
   gap: 0.75rem;
   padding: 1rem;
-  border: 2px solid #e5e0d5;
+  border: 2px solid var(--color-borde);
   border-radius: 8px;
   cursor: pointer;
   transition: border-color 0.2s, background 0.2s;
@@ -367,7 +367,7 @@ async function enviarPedido() {
 }
 
 .entrega-opcion.active {
-  border-color: #c9a84c;
+  border-color: var(--color-dorado);
   background: #fdf8ef;
 }
 
@@ -378,21 +378,21 @@ async function enviarPedido() {
 
 .entrega-opcion strong {
   font-size: 0.9rem;
-  color: #1a1a1a;
+  color: var(--color-texto);
 }
 
 .entrega-opcion span {
   font-size: 0.8rem;
-  color: #888;
+  color: var(--color-texto-2);
 }
 
 .entrega-opcion svg {
-  color: #c9a84c;
+  color: var(--color-dorado);
   flex-shrink: 0;
 }
 
 .error-msg {
-  color: #d9534f;
+  color: var(--color-error);
   font-size: 0.9rem;
   margin-bottom: 1rem;
 }
@@ -400,8 +400,8 @@ async function enviarPedido() {
 .btn-confirmar {
   width: 100%;
   padding: 1rem;
-  background: #c9a84c;
-  color: white;
+  background: var(--color-dorado);
+  color: var(--color-texto);
   border: none;
   border-radius: 6px;
   font-weight: 700;
@@ -411,7 +411,7 @@ async function enviarPedido() {
 }
 
 .btn-confirmar:hover:not(:disabled) {
-  background: #b39340;
+  background: var(--color-dorado-hover);
 }
 
 .btn-confirmar:disabled {
@@ -430,9 +430,9 @@ async function enviarPedido() {
 }
 
 .checkout-resumen h2 {
-  font-family: Georgia, serif;
+  font-family: var(--fuente-titulos);
   font-size: 1.2rem;
-  color: #1a1a1a;
+  color: var(--color-texto);
   margin-bottom: 1.25rem;
 }
 
@@ -467,35 +467,35 @@ async function enviarPedido() {
 .resumen-nombre {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--color-texto);
 }
 
 .resumen-qty {
   font-size: 0.78rem;
-  color: #888;
+  color: var(--color-texto-2);
 }
 
 .resumen-precio {
   font-weight: 600;
   font-size: 0.9rem;
-  color: #1a1a1a;
+  color: var(--color-texto);
 }
 
 .resumen-linea {
   display: flex;
   justify-content: space-between;
   padding: 0.5rem 0;
-  color: #555;
+  color: var(--color-texto-2);
   font-size: 0.9rem;
 }
 
 .resumen-total {
-  border-top: 2px solid #1a1a1a;
+  border-top: 2px solid var(--color-texto);
   margin-top: 0.5rem;
   padding-top: 0.75rem;
   font-weight: 700;
   font-size: 1.05rem;
-  color: #1a1a1a;
+  color: var(--color-texto);
 }
 
 /* Responsive */

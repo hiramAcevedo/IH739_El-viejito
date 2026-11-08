@@ -201,7 +201,7 @@ onMounted(() => {
 
 <style scoped>
 .productos-page {
-  background-color: #faf7f2;
+  background-color: var(--color-crema);
 }
 
 /* Hero Section */
@@ -220,7 +220,7 @@ onMounted(() => {
 
 .hero-content h1 {
   font-size: 3rem;
-  font-family: Georgia, serif;
+  font-family: var(--fuente-titulos);
   margin-bottom: 1rem;
   font-weight: normal;
 }
@@ -256,7 +256,7 @@ onMounted(() => {
 
 .spinner {
   border: 4px solid #e8e8e8;
-  border-top: 4px solid #c9a84c;
+  border-top: 4px solid var(--color-dorado);
   border-radius: 50%;
   width: 50px;
   height: 50px;
@@ -271,20 +271,20 @@ onMounted(() => {
 
 .loading-state p,
 .empty-state p {
-  color: #666;
+  color: var(--color-texto-2);
   font-size: 1.1rem;
 }
 
 .error-state p {
-  color: #d9534f;
+  color: var(--color-error);
   font-size: 1.1rem;
   margin-bottom: 1.5rem;
 }
 
 .retry-btn {
   padding: 0.75rem 1.5rem;
-  background-color: #c9a84c;
-  color: white;
+  background-color: var(--color-dorado);
+  color: var(--color-texto);
   border: none;
   border-radius: 4px;
   font-size: 1rem;
@@ -294,7 +294,7 @@ onMounted(() => {
 }
 
 .retry-btn:hover {
-  background-color: #b39340;
+  background-color: var(--color-dorado-hover);
 }
 
 /* Filtros */
@@ -319,25 +319,25 @@ onMounted(() => {
 
 .filtro-btn {
   padding: 0.5rem 1rem;
-  border: 2px solid #e5e0d5;
+  border: 2px solid var(--color-borde);
   background: white;
   border-radius: 20px;
   font-size: 0.85rem;
   cursor: pointer;
   transition: all 0.2s;
   font-weight: 500;
-  color: #555;
+  color: var(--color-texto-2);
 }
 
 .filtro-btn:hover {
-  border-color: #c9a84c;
-  color: #c9a84c;
+  border-color: var(--color-dorado);
+  color: var(--color-dorado);
 }
 
 .filtro-btn.active {
-  background: #c9a84c;
-  border-color: #c9a84c;
-  color: white;
+  background: var(--color-dorado);
+  border-color: var(--color-dorado);
+  color: var(--color-texto);
 }
 
 .filtros-precio {
@@ -349,18 +349,18 @@ onMounted(() => {
 
 .filtro-label {
   font-size: 0.85rem;
-  color: #555;
+  color: var(--color-texto-2);
   font-weight: 500;
 }
 
 .filtro-range {
   width: 100%;
-  accent-color: #c9a84c;
+  accent-color: var(--color-dorado);
   cursor: pointer;
 }
 
 .resultados-count {
-  color: #888;
+  color: var(--color-texto-2);
   font-size: 0.9rem;
   margin-bottom: 1rem;
 }
@@ -444,8 +444,8 @@ onMounted(() => {
 
 .product-name {
   font-size: 1.3rem;
-  font-family: Georgia, serif;
-  color: #1a1a1a;
+  font-family: var(--fuente-titulos);
+  color: var(--color-texto);
   margin: 0;
   flex: 1;
 }
@@ -469,7 +469,7 @@ onMounted(() => {
 .badge-extra_añejo { background-color: #fce4ec; color: #880e4f; }
 
 .product-description {
-  color: #666;
+  color: var(--color-texto-2);
   font-size: 0.95rem;
   line-height: 1.5;
   margin-bottom: 1rem;
@@ -488,7 +488,7 @@ onMounted(() => {
 .product-price {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #c9a84c;
+  color: var(--color-dorado);
   font-family: 'Arial', sans-serif;
 }
 
@@ -498,8 +498,8 @@ onMounted(() => {
   align-items: center;
   gap: 0.35rem;
   padding: 0.45rem 0.9rem;
-  background: #c9a84c;
-  color: white;
+  background: var(--color-dorado);
+  color: var(--color-texto);
   border: none;
   border-radius: 4px;
   font-size: 0.8rem;
@@ -510,7 +510,7 @@ onMounted(() => {
 }
 
 .btn-agregar-grid:hover {
-  background: #b39340;
+  background: var(--color-dorado-hover);
   transform: scale(1.05);
 }
 

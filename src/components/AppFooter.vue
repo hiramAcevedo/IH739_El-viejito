@@ -40,7 +40,7 @@ import { Facebook, Instagram, Music2, MessageCircle } from 'lucide-vue-next'
 
 <style scoped>
 .main-footer {
-  background: #1a1a1a;
+  background: var(--color-oscuro);
   color: #fff;
   padding: 3rem 1rem 1rem;
   margin-top: 3rem;
@@ -56,14 +56,14 @@ import { Facebook, Instagram, Music2, MessageCircle } from 'lucide-vue-next'
 }
 
 .footer-info h3 {
-  color: #c9a84c;
+  color: var(--color-dorado);
   font-size: 1.8rem;
   margin-bottom: 1rem;
 }
 
 .footer-social h4,
 .footer-contact h4 {
-  color: #f5f0e8;
+  color: var(--color-crema-oscuro);
   margin-bottom: 0.75rem;
 }
 
@@ -75,7 +75,7 @@ import { Facebook, Instagram, Music2, MessageCircle } from 'lucide-vue-next'
 }
 
 .footer-social a {
-  color: #c9a84c;
+  color: var(--color-dorado);
   text-decoration: none;
   transition: color 0.3s, transform 0.2s;
   display: flex;
@@ -84,7 +84,7 @@ import { Facebook, Instagram, Music2, MessageCircle } from 'lucide-vue-next'
 }
 
 .footer-social a:hover {
-  color: #f5f0e8;
+  color: var(--color-crema-oscuro);
   transform: scale(1.15);
 }
 
@@ -94,6 +94,6 @@ import { Facebook, Instagram, Music2, MessageCircle } from 'lucide-vue-next'
   padding-top: 1.5rem;
   text-align: center;
   font-size: 0.8rem;
-  color: #888;
+  color: var(--color-texto-tenue);
 }
 </style>

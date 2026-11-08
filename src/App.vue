@@ -35,9 +35,9 @@
   }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #faf7f2;
-    color: #1a1a1a;
+    font-family: var(--fuente-texto);
+    background: var(--color-crema);
+    color: var(--color-texto);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
   }
@@ -56,8 +56,8 @@
     position: fixed;
     bottom: 2rem;
     right: 2rem;
-    background-color: #1a1a1a;
-    color: #c9a84c;
+    background-color: var(--color-oscuro);
+    color: var(--color-dorado);
     border-radius: 50%;
     width: 54px;
     height: 54px;
@@ -67,12 +67,12 @@
     box-shadow: 0 4px 16px rgba(0,0,0,0.2);
     z-index: 1000;
     transition: transform 0.3s ease, background-color 0.3s;
-    border: 2px solid #c9a84c;
+    border: 2px solid var(--color-dorado);
   }
 
   .whatsapp-float:hover {
     transform: scale(1.08);
-    background-color: #c9a84c;
-    color: #1a1a1a;
+    background-color: var(--color-dorado);
+    color: var(--color-texto);
   }
 </style>

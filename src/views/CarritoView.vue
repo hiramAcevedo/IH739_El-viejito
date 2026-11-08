@@ -130,7 +130,7 @@ function formatPrice(precio) {
 
 <style scoped>
 .carrito-page {
-  background-color: #faf7f2;
+  background-color: var(--color-crema);
   min-height: 100vh;
   padding: 6rem 2rem 4rem;
 }
@@ -141,9 +141,9 @@ function formatPrice(precio) {
 }
 
 .carrito-titulo {
-  font-family: Georgia, serif;
+  font-family: var(--fuente-titulos);
   font-size: 2.2rem;
-  color: #1a1a1a;
+  color: var(--color-texto);
   margin-bottom: 2rem;
 }
 
@@ -158,15 +158,15 @@ function formatPrice(precio) {
 }
 
 .carrito-vacio p {
-  color: #888;
+  color: var(--color-texto-2);
   font-size: 1.15rem;
 }
 
 .btn-catalogo {
   display: inline-block;
   padding: 0.85rem 2rem;
-  background: #c9a84c;
-  color: white;
+  background: var(--color-dorado);
+  color: var(--color-texto);
   text-decoration: none;
   border-radius: 6px;
   font-weight: 600;
@@ -174,7 +174,7 @@ function formatPrice(precio) {
 }
 
 .btn-catalogo:hover {
-  background: #b39340;
+  background: var(--color-dorado-hover);
 }
 
 /* Layout con items */
@@ -196,8 +196,8 @@ function formatPrice(precio) {
 }
 
 .carrito-tabla thead {
-  background: #1a1a1a;
-  color: #f5f0e8;
+  background: var(--color-oscuro);
+  color: var(--color-crema-oscuro);
 }
 
 .carrito-tabla th {
@@ -213,7 +213,7 @@ function formatPrice(precio) {
   padding: 1rem;
   border-bottom: 1px solid #f0ebe3;
   vertical-align: middle;
-  color: #555;
+  color: var(--color-texto-2);
 }
 
 .celda-producto {
@@ -232,12 +232,12 @@ function formatPrice(precio) {
 
 .item-nombre {
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--color-texto);
 }
 
 .celda-subtotal {
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--color-texto);
 }
 
 /* Controles de cantidad */
@@ -261,20 +261,20 @@ function formatPrice(precio) {
 }
 
 .btn-qty:hover {
-  border-color: #c9a84c;
+  border-color: var(--color-dorado);
 }
 
 .qty-value {
   min-width: 28px;
   text-align: center;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--color-texto);
 }
 
 .btn-eliminar {
   background: none;
   border: none;
-  color: #d9534f;
+  color: var(--color-error);
   cursor: pointer;
   padding: 4px;
   border-radius: 4px;
@@ -297,9 +297,9 @@ function formatPrice(precio) {
 }
 
 .carrito-resumen h2 {
-  font-family: Georgia, serif;
+  font-family: var(--fuente-titulos);
   font-size: 1.2rem;
-  color: #1a1a1a;
+  color: var(--color-texto);
   margin-bottom: 1.5rem;
 }
 
@@ -307,17 +307,17 @@ function formatPrice(precio) {
   display: flex;
   justify-content: space-between;
   padding: 0.6rem 0;
-  color: #555;
+  color: var(--color-texto-2);
   font-size: 0.95rem;
 }
 
 .resumen-total {
-  border-top: 2px solid #1a1a1a;
+  border-top: 2px solid var(--color-texto);
   margin-top: 0.75rem;
   padding-top: 0.75rem;
   font-weight: 700;
   font-size: 1.1rem;
-  color: #1a1a1a;
+  color: var(--color-texto);
 }
 
 .btn-proceder {
@@ -325,8 +325,8 @@ function formatPrice(precio) {
   width: 100%;
   padding: 0.9rem;
   margin-top: 1.5rem;
-  background: #c9a84c;
-  color: white;
+  background: var(--color-dorado);
+  color: var(--color-texto);
   text-align: center;
   text-decoration: none;
   border-radius: 6px;
@@ -336,7 +336,7 @@ function formatPrice(precio) {
 }
 
 .btn-proceder:hover {
-  background: #b39340;
+  background: var(--color-dorado-hover);
 }
 
 .btn-vaciar {
@@ -346,7 +346,7 @@ function formatPrice(precio) {
   margin-top: 0.75rem;
   background: none;
   border: 1px solid #ddd;
-  color: #888;
+  color: var(--color-texto-2);
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.9rem;
@@ -354,8 +354,8 @@ function formatPrice(precio) {
 }
 
 .btn-vaciar:hover {
-  border-color: #d9534f;
-  color: #d9534f;
+  border-color: var(--color-error);
+  color: var(--color-error);
 }
 
 /* Modal */
@@ -379,7 +379,7 @@ function formatPrice(precio) {
 }
 
 .modal-box p {
-  color: #1a1a1a;
+  color: var(--color-texto);
   font-size: 1.05rem;
   margin-bottom: 1.5rem;
 }
@@ -397,12 +397,12 @@ function formatPrice(precio) {
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.9rem;
-  color: #555;
+  color: var(--color-texto-2);
 }
 
 .btn-confirmar {
   padding: 0.6rem 1.5rem;
-  background: #d9534f;
+  background: var(--color-error);
   color: white;
   border: none;
   border-radius: 6px;
