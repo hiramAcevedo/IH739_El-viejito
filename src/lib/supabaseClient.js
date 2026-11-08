@@ -80,17 +80,6 @@ export async function deleteProducto(id) {
   if (error) throw error
 }
 
-/** Crea un pedido desde el checkout
- *  El cliente debe generar el id (crypto.randomUUID()) y mandarlo en el objeto.
- *  No usamos .select() para no requerir SELECT policy en anon (RLS). */
-export async function createPedido(pedido) {
-  const { error } = await supabase
-    .from('pedidos')
-    .insert(pedido)
-  if (error) throw error
-  return { id: pedido.id }
-}
-
 /** Obtiene todos los pedidos (solo admin via RLS) */
 export async function getPedidos() {
   const { data, error } = await supabase
