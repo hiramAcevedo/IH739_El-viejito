@@ -192,6 +192,19 @@ npm run dev
 
 ---
 
+## Pruebas
+
+Pruebas unitarias y de componentes con Vitest, Vue Test Utils y jsdom, en `tests/`:
+
+```bash
+npm run test
+```
+
+No leen el `.env`: las variables de prueba están en `vitest.config.js`, y Supabase, la API y `fetch` se simulan, así que
+ninguna prueba sale a la red.
+
+---
+
 ## Estructura del proyecto
 
 ```
