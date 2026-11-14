@@ -127,7 +127,9 @@ async function revisar() {
     }
     seguirPreguntando()
   } catch (e) {
-    fallo.value = e.message || 'No pudimos revisar el pago.'
+    // si se cae una consulta mientras se confirma, la pantalla sigue preguntando, como promete («se actualiza sola»)
+    if (estado.value === 'confirmando') seguirPreguntando()
+    else fallo.value = e.message || 'No pudimos revisar el pago.'
   } finally {
     cargando.value = false
   }
