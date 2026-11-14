@@ -148,9 +148,20 @@ export const useAuthStore = defineStore('auth', () => {
         return false
       }
 
-      isAdmin.value = !!adminData
-      nombre.value = adminData?.nombre || ''
-      rol.value = adminData?.rol || ''
+      if (!adminData) {
+        // La sesión de Supabase sigue viva pero la cuenta ya no es de un administrador activo (apagada o sin
+        // registro): se cierra como en login() y el panel no se abre
+        await supabase.auth.signOut()
+        user.value = null
+        isAdmin.value = false
+        nombre.value = ''
+        rol.value = ''
+        return false
+      }
+
+      isAdmin.value = true
+      nombre.value = adminData.nombre || ''
+      rol.value = adminData.rol || ''
       return true
     } catch (err) {
       console.error('CheckAuth error:', err)
