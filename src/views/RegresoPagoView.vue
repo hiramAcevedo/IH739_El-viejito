@@ -76,6 +76,7 @@ import { useCarritoStore } from '@/stores/carritoStore'
 import BotonPrimario from '@/components/compartidos/BotonPrimario.vue'
 import ResumenPedido from '@/components/compartidos/ResumenPedido.vue'
 import EstadoPago from '@/components/compartidos/EstadoPago.vue'
+import { estadoDe } from '@/lib/regreso.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -86,14 +87,6 @@ const datos = ref(null)
 const estado = ref('')
 
 const PANTALLA = { confirmado: 'pago-confirmado', confirmando: 'pago-confirmado', pendiente: 'pago-pendiente', error: 'pago-error' }
-
-function estadoDe(respuesta) {
-  // confirmado sólo cuando la base ya tiene el pago: lo escribe el aviso de la pasarela, no el regreso del comprador
-  if (respuesta.estado_pago === 'pagado') return 'confirmado'
-  if (respuesta.pago === 'paid') return 'confirmando'
-  if (respuesta.estado_sesion === 'expired' || respuesta.estado_pago === 'rechazado') return 'error'
-  return 'pendiente' // sesión abierta, o completa con el pago en camino
-}
 
 // mientras el aviso no llega, la pantalla vuelve a preguntar cada 2 segundos, hasta un minuto
 let intentos = 0

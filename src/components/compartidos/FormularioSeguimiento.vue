@@ -26,6 +26,7 @@
  */
 import { ref } from 'vue'
 import BotonPrimario from './BotonPrimario.vue'
+import { esCorreoValido, esFolioValido } from '@/lib/validacion.js'
 
 defineProps({ cargando: { type: Boolean, default: false }, error: { type: String, default: '' } })
 const emit = defineEmits(['buscar'])
@@ -35,8 +36,8 @@ const errorCorreo = ref('')
 const errorFolio = ref('')
 
 function enviar() {
-  errorCorreo.value = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(correo.value) ? '' : 'Escribe el correo con el que compraste.'
-  errorFolio.value = /^[0-9A-F]{8}$/.test(folio.value) ? '' : 'El folio tiene ocho caracteres, letras de la A a la F y números.'
+  errorCorreo.value = esCorreoValido(correo.value) ? '' : 'Escribe el correo con el que compraste.'
+  errorFolio.value = esFolioValido(folio.value) ? '' : 'El folio tiene ocho caracteres, letras de la A a la F y números.'
   if (!errorCorreo.value && !errorFolio.value) emit('buscar', { correo: correo.value.toLowerCase(), folio: folio.value })
 }
 </script>

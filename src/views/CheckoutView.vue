@@ -65,6 +65,7 @@ import BotonPrimario from '@/components/compartidos/BotonPrimario.vue'
 import ResumenPedido from '@/components/compartidos/ResumenPedido.vue'
 import ConfirmacionEdad from '@/components/compartidos/ConfirmacionEdad.vue'
 import SelectorEntrega from '@/components/compartidos/SelectorEntrega.vue'
+import { esCorreoValido } from '@/lib/validacion.js'
 
 const router = useRouter()
 const carrito = useCarritoStore()
@@ -91,7 +92,7 @@ const direccionCompleta = computed(() => {
   const d = form.direccion
   return Boolean(d.calle && d.colonia && d.ciudad && d.estado && /^\d{5}$/.test(d.codigo_postal))
 })
-const contactoCompleto = computed(() => Boolean(form.nombre) && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.correo))
+const contactoCompleto = computed(() => Boolean(form.nombre) && esCorreoValido(form.correo))
 const listo = computed(() => form.mayorDeEdad && contactoCompleto.value && direccionCompleta.value && cotizacion.value && !calculando.value)
 const textoPagar = computed(() => (cotizacion.value && !calculando.value ? `Pagar ${formatoMoneda(cotizacion.value.total)}` : 'Pagar'))
 const faltante = computed(() => {
