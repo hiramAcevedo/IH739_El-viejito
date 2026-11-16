@@ -16,7 +16,7 @@ test.describe('Panel de administración', () => {
     await page.goto('/admin')
     await expect(page.getByRole('heading', { name: 'Panel de administración' })).toBeVisible()
     await expect(page.getByText(/registrados ·/)).toBeVisible()
-    await page.getByRole('button', { name: 'Pedidos' }).click()
+    await page.getByRole('button', { name: 'Pedidos', exact: true }).click()
     await expect(page.getByText(`#${PAGADO}`)).toBeVisible()
   })
 })

@@ -2,15 +2,15 @@ import { test, expect } from '@playwright/test'
 import { sembrarCarrito, llenarCheckout } from './ayuda.js'
 
 test.describe('Compra', () => {
-  test('el checkout no avanza sin la confirmación de mayoría de edad', async ({ page, request }) => {
+  test('el checkout no deja pagar sin la confirmación de mayoría de edad', async ({ page, request }) => {
     await sembrarCarrito(page, request, [['Blanco Clásico', 1]])
     await page.goto('/checkout')
     await llenarCheckout(page, 'Prueba 3.4 sin edad')
-    await page.click('button[type=submit]')
+    const pagar = page.locator('button[type=submit]')
+    await expect(pagar).toBeDisabled()
+    await page.check('input[type=checkbox][required]')
+    await expect(pagar).toBeEnabled()
     await expect(page).toHaveURL(/\/checkout$/)
-    const edad = page.locator('input[type=checkbox][required]')
-    await expect(edad).not.toBeChecked()
-    expect(await edad.evaluate((el) => el.validity.valueMissing)).toBe(true)
   })
 
   test('compra aprobada con la tarjeta 4242 termina en «Pago confirmado»', async ({ page, request }) => {
@@ -43,7 +43,13 @@ test.describe('Compra', () => {
     await page.click('button[type=submit]')
     await expect(page.getByText(/rechaz|declined/i).first()).toBeVisible({ timeout: 30_000 })
     await page.locator("a[href*='/pago/error'], a[href*='localhost:5173']").first().click()
-    await page.waitForURL('**/pago/error**')
-    await expect(page.getByRole('button', { name: /intentar de nuevo/i }).or(page.getByText(/intentar de nuevo/i)).first()).toBeVisible()
+    await page.waitForURL(/\/pago\/(error|pendiente)/)
+    // Si el comprador vuelve antes del aviso de Stripe, la sesión sigue abierta («Completa tu pago»); con el aviso en
+    // la base, la misma liga muestra el error con «Intentar de nuevo».
+    await expect(async () => {
+      await page.reload()
+      await expect(page.getByText(/intentar de nuevo/i).first()).toBeVisible({ timeout: 3_000 })
+    }).toPass({ timeout: 45_000, intervals: [2_000] })
+    await expect(page).toHaveURL(/\/pago\/error/)
   })
 })
