@@ -1,6 +1,7 @@
 <template>
   <NavBar />
-  <RouterView />
+  <!-- la vista llega por separado: el alto mínimo deja el pie fuera de la pantalla mientras carga, y nada se recorre -->
+  <div class="pagina"><RouterView /></div>
   <AppFooter />
   <component :is="AvisoEjemplo" v-if="AvisoEjemplo" />
   
@@ -52,6 +53,10 @@
   img {
     max-width: 100%;
     display: block;
+  }
+
+  .pagina {
+    min-height: 100vh;
   }
 
   a {
