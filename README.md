@@ -190,6 +190,10 @@ npm run dev
 | `VITE_API_URL` | Direccion de la API de pedidos y pagos en cada entorno (en local, `http://127.0.0.1:8000/api`) |
 | `VITE_API_EJEMPLO` | `1` para responder con el modulo de ejemplo en `npm run dev`; sin la variable, el sitio llama a la API |
 
+En cada entorno, `VITE_API_URL` apunta a su API: `http://127.0.0.1:8000/api` en local, la API de vista previa en las
+ramas de sprint y `https://api.tequilaelviejito.shop/api` en produccion, cuando la API se publique. `VITE_API_EJEMPLO` va
+en `0` fuera del servidor de desarrollo (el build de produccion ni siquiera incluye el modulo de ejemplo).
+
 ---
 
 ## Pruebas
@@ -202,6 +206,24 @@ npm run test
 
 No leen el `.env`: las variables de prueba están en `vitest.config.js`, y Supabase, la API y `fetch` se simulan, así que
 ninguna prueba sale a la red.
+
+Cobertura de las mismas pruebas, con v8:
+
+```bash
+npm run test:cobertura
+```
+
+Pruebas de punta a punta con Playwright, en el Chrome instalado, contra el build de produccion (`npm run build` y
+`npx vite preview --port 5173`), la API en `127.0.0.1:8000` y la CLI de Stripe reenviando los avisos:
+
+```bash
+npm run test:e2e        # Chrome de escritorio: compra, seguimiento, panel, aceptacion y ocho paginas a 360 px
+npm run test:compat     # compra y seguimiento en WebKit (iPhone 14), Chrome (Pixel 7) y Firefox
+```
+
+WebKit y Firefox se bajan una vez con `npx playwright install webkit firefox`. `E2E_BASE_URL` y `E2E_API` cambian el sitio
+y la API, por ejemplo a la vista previa; `E2E_SESION` (la sesion del panel) y `E2E_FIRMA` (una liga firmada de prueba)
+habilitan las pruebas que las necesitan.
 
 ---
 
