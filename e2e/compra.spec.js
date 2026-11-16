@@ -13,7 +13,7 @@ test.describe('Compra', () => {
     await expect(page).toHaveURL(/\/checkout$/)
   })
 
-  test('compra aprobada con la tarjeta 4242 termina en «Pago confirmado»', async ({ page, request }) => {
+  test('compra aprobada con la tarjeta 4242 termina en "Pago confirmado"', async ({ page, request }) => {
     await sembrarCarrito(page, request, [['Reposado Suave', 1]])
     await page.goto('/checkout')
     await llenarCheckout(page, 'Prueba 3.4 aprobado')
