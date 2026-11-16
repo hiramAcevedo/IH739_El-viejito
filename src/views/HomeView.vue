@@ -332,7 +332,7 @@
   .product-card__price {
     font-size: 1.1rem;
     font-weight: 700;
-    color: var(--color-dorado);
+    color: var(--color-dorado-texto);
   }
 
   /* Espacio para hover y paginación debajo de las cards */
@@ -366,7 +366,7 @@
     display: inline-block;
     padding: 0.75rem 2rem;
     border: 2px solid var(--color-dorado);
-    color: var(--color-dorado);
+    color: var(--color-dorado-texto);
     text-decoration: none;
     font-weight: 600;
     font-size: 0.9rem;

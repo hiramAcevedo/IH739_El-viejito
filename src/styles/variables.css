@@ -12,6 +12,7 @@
   --color-dorado: #c9a84c;         /* color de la marca: botón primario y acentos */
   --color-dorado-hover: #b39340;
   --color-dorado-claro: #e0c068;
+  --color-dorado-texto: #856518;   /* dorado para texto sobre blanco o crema: 5.4:1 (el de la marca daba 2.3:1) */
 
   /* Texto. Sobre el dorado va el texto casi negro: 7.6:1 (el blanco daba 2.3:1). */
   --color-texto: #1a1a1a;

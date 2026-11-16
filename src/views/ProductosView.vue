@@ -44,8 +44,9 @@
             </div>
 
             <div class="filtros-precio">
-              <label class="filtro-label">Precio max: {{ formatPrice(precioMax) }}</label>
+              <label class="filtro-label" for="filtro-precio">Precio max: {{ formatPrice(precioMax) }}</label>
               <input
+                id="filtro-precio"
                 type="range"
                 :min="precioRangoMin"
                 :max="precioRangoMax"
@@ -80,7 +81,7 @@
                 </div>
                 <div class="product-info">
                   <div class="product-header">
-                    <h3 class="product-name">{{ producto.nombre }}</h3>
+                    <h2 class="product-name">{{ producto.nombre }}</h2>
                     <span :class="['type-badge', `badge-${producto.tipo}`]">
                       {{ formatTipo(producto.tipo) }}
                     </span>
@@ -464,7 +465,7 @@ onMounted(() => {
 }
 
 .badge-blanco { background-color: #e8f4f8; color: #0c566e; }
-.badge-reposado { background-color: #fff3e0; color: #e65100; }
+.badge-reposado { background-color: #fff3e0; color: #bf4300; }
 .badge-añejo { background-color: #f3e5f5; color: #6a1b9a; }
 .badge-extra_añejo { background-color: #fce4ec; color: #880e4f; }
 
@@ -488,7 +489,7 @@ onMounted(() => {
 .product-price {
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--color-dorado);
+  color: var(--color-dorado-texto);
   font-family: 'Arial', sans-serif;
 }
 

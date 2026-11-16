@@ -2,11 +2,11 @@
   <footer class="main-footer">
     <div class="footer-container">
       <div class="footer-info">
-        <h3>El Viejito</h3>
+        <h2>El Viejito</h2>
         <p>Destilando tradición desde hace generaciones.</p>
       </div>
       <div class="footer-social">
-        <h4>Síguenos</h4>
+        <h3>Síguenos</h3>
         <div class="social-links">
           <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook">
             <Facebook :size="22" />
@@ -23,7 +23,7 @@
         </div>
       </div>
       <div class="footer-contact">
-        <h4>Contacto</h4>
+        <h3>Contacto</h3>
         <p>Email: contacto@elviejito.com</p>
         <p>Tel: +52 (33) 1234-5678</p>
       </div>
@@ -76,14 +76,15 @@ onMounted(async () => {
   text-align: center;
 }
 
-.footer-info h3 {
+.footer-info h2 {
   color: var(--color-dorado);
   font-size: 1.8rem;
   margin-bottom: 1rem;
 }
 
-.footer-social h4,
-.footer-contact h4 {
+.footer-social h3,
+.footer-contact h3 {
+  font-size: 1rem;
   color: var(--color-crema-oscuro);
   margin-bottom: 0.75rem;
 }
