@@ -75,7 +75,7 @@
 </template>
 
 <script setup>
-  import { onMounted, nextTick, watch } from 'vue'
+  import { onMounted, onBeforeUnmount, nextTick } from 'vue'
   import { RouterLink } from 'vue-router'
   import Swiper from 'swiper'
   import { Navigation, Pagination, Autoplay } from 'swiper/modules'
@@ -99,7 +99,6 @@
   let swiperInstance = null
 
   function initSwiper() {
-    if (swiperInstance) swiperInstance.destroy(true, true)
     const totalSlides = productosStore.productos.length
     swiperInstance = new Swiper('.product-swiper', {
       modules: [Navigation, Pagination, Autoplay],
@@ -126,6 +125,9 @@
       initSwiper()
     }
   })
+
+  // al salir de la página, el carrusel deja de avanzar solo y suelta sus eventos
+  onBeforeUnmount(() => swiperInstance?.destroy(true, true))
 </script>
 
 <style scoped>
