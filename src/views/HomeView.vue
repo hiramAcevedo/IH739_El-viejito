@@ -68,7 +68,7 @@
         <RouterLink to="/nosotros" class="btn-secondary">Conoce nuestra historia</RouterLink>
       </div>
       <div class="welcome__img">
-        <img :src="pintado ? imgHistoria : undefined" alt="Destilería El Viejito" class="welcome__real-img" loading="lazy" decoding="async" width="1200" height="509" />
+        <img :src="pintado ? imgHistoria : undefined" alt="Destilería El Viejito" class="welcome__real-img" loading="lazy" decoding="async" />
       </div>
     </section>
   </main>
@@ -375,9 +375,10 @@
   }
 
   /* ── Welcome ── */
+  /* minmax(0, 1fr): una columna no crece por el ancho mínimo de lo que lleva (la imagen, mientras llega) */
   .welcome {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 4rem;
     align-items: center;
   }
@@ -416,7 +417,7 @@
 
   @media (max-width: 768px) {
     .welcome {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
   }
 </style>
