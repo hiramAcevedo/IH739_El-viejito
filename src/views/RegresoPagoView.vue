@@ -7,13 +7,14 @@
         <p class="regreso__texto">Le preguntamos al sistema en qué estado quedó tu pedido.</p>
       </template>
 
+      <!-- sólo se afirma lo que ya está en la base: el pedido sigue pendiente hasta que llega el aviso de la pasarela -->
       <template v-else-if="estado === 'confirmando' && agotado">
-        <EstadoPago estado="aprobado" forma="larga" />
-        <h1>Tu pago fue aprobado</h1>
+        <EstadoPago estado="validando" forma="larga" />
+        <h1>Estamos validando tu pago</h1>
         <p class="regreso__folio-etiqueta">Folio</p>
         <p class="regreso__folio">#{{ datos.folio }}</p>
-        <p class="regreso__texto">La confirmación está tardando. Te llegará un correo y puedes seguir tu pedido con tu
-          folio en Rastrear pedido.</p>
+        <p class="regreso__texto">Esto puede tardar unos minutos. Te enviaremos un correo de confirmación cuando acreditemos
+          tu pago; mientras, puedes ver el estado de tu pedido con tu folio en Rastrear pedido.</p>
         <ResumenPedido :cotizacion="datos" titulo="" compacto />
         <BotonPrimario bloque @click="empezar">Volver a revisar</BotonPrimario>
         <RouterLink to="/seguimiento" class="regreso__liga">Rastrear pedido</RouterLink>
@@ -24,8 +25,7 @@
         <h1>Confirmando tu pago</h1>
         <p class="regreso__folio-etiqueta">Folio</p>
         <p class="regreso__folio">#{{ datos.folio }}</p>
-        <p class="regreso__texto">La pasarela ya aprobó el cargo; falta que su aviso llegue al sistema. Esta pantalla se
-          actualiza sola.</p>
+        <p class="regreso__texto">Estamos confirmando tu pago. Esta pantalla se actualiza sola.</p>
         <ResumenPedido :cotizacion="datos" titulo="" compacto />
       </template>
 

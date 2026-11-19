@@ -108,7 +108,9 @@ describe('RegresoPagoView: pantallas de regreso de la pasarela', () => {
 
     expect(titulo(wrapper)).toBe('Confirmando tu pago')
     expect(wrapper.get('.regreso__folio').text()).toBe('#C41D9A7E')
-    expect(wrapper.text()).toContain('Esta pantalla se actualiza sola.')
+    expect(wrapper.text()).toContain('Estamos confirmando tu pago. Esta pantalla se actualiza sola.')
+    // la página sólo afirma lo que ya está en la base: nada de «aprobó el cargo» mientras el pedido sigue pendiente
+    expect(wrapper.text()).not.toMatch(/aprob/i)
     expect(wrapper.text()).toContain('$1,832.80')
     expect(router.currentRoute.value.name).toBe('pago-confirmado')
     expect(carrito.items).toHaveLength(1)
@@ -169,10 +171,14 @@ describe('RegresoPagoView: pantallas de regreso de la pasarela', () => {
     await vi.advanceTimersByTimeAsync(80000)
     await flushPromises()
     expect(api.consultarRegreso).toHaveBeenCalledTimes(25) // la última, a los 120 s
-    expect(titulo(wrapper)).toBe('Tu pago fue aprobado')
-    expect(wrapper.get('.pago').text()).toBe('Pago aprobado')
+    expect(titulo(wrapper)).toBe('Estamos validando tu pago')
+    expect(wrapper.get('.pago').text()).toBe('Validando pago')
+    expect(wrapper.get('.pago').classes()).toContain('pago--validando')
     expect(wrapper.get('.regreso__folio').text()).toBe('#C41D9A7E')
-    expect(wrapper.text()).toContain('La confirmación está tardando. Te llegará un correo')
+    expect(wrapper.text()).toContain('Esto puede tardar unos minutos. Te enviaremos un correo de confirmación cuando ' +
+      'acreditemos tu pago; mientras, puedes ver el estado de tu pedido con tu folio en Rastrear pedido.')
+    expect(wrapper.text()).not.toMatch(/aprob/i)
+    expect(wrapper.findAll('button').map((b) => b.text())).toContain('Volver a revisar')
     expect(wrapper.text()).not.toContain('Esta pantalla se actualiza sola.')
     expect(wrapper.get('a.regreso__liga').attributes('href')).toBe('/seguimiento')
     expect(vi.getTimerCount()).toBe(0)
@@ -186,7 +192,7 @@ describe('RegresoPagoView: pantallas de regreso de la pasarela', () => {
     const { wrapper } = await montar('/pago/confirmado?session_id=cs_test_1')
     await vi.advanceTimersByTimeAsync(120000)
     await flushPromises()
-    expect(titulo(wrapper)).toBe('Tu pago fue aprobado')
+    expect(titulo(wrapper)).toBe('Estamos validando tu pago')
     const volver = () => wrapper.findAll('button').find((b) => b.text() === 'Volver a revisar')
 
     await volver().trigger('click')
@@ -217,7 +223,7 @@ describe('RegresoPagoView: pantallas de regreso de la pasarela', () => {
     await vi.advanceTimersByTimeAsync(80000)
     await flushPromises()
     expect(api.consultarRegreso).toHaveBeenCalledTimes(25)
-    expect(titulo(wrapper)).toBe('Tu pago fue aprobado')
+    expect(titulo(wrapper)).toBe('Estamos validando tu pago')
     expect(wrapper.text()).not.toContain('No encontramos ese pago')
   })
 
