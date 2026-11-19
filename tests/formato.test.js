@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { formatoMoneda, formatoFecha, formatoFechaHora } from '@/lib/formato'
+import { formatoMoneda, formatoFecha, formatoFechaHora, cuenta } from '@/lib/formato'
 
 describe('formato.js', () => {
   it('formatoMoneda: pesos con separador de miles y dos decimales, también con el importe en texto que manda la API', () => {
@@ -25,5 +25,12 @@ describe('formato.js', () => {
     expect(formatoFechaHora('2026-11-09T18:30:00-06:00')).toBe('9 nov, 06:30 p.m.')
     expect(formatoFechaHora('2026-11-05T09:05:00-06:00')).toBe('5 nov, 09:05 a.m.')
     expect(formatoFechaHora('2026-11-06T03:30:00Z')).toBe('5 nov, 09:30 p.m.')
+  })
+
+  it('cuenta: singular sólo con 1; con 0 y con más, plural; también con la cifra en texto', () => {
+    expect(cuenta(1, 'guía por capturar', 'guías por capturar')).toBe('1 guía por capturar')
+    expect(cuenta(9, 'guía por capturar', 'guías por capturar')).toBe('9 guías por capturar')
+    expect(cuenta(0, 'administrador', 'administradores')).toBe('0 administradores')
+    expect(cuenta('1', 'registrado', 'registrados')).toBe('1 registrado')
   })
 })
