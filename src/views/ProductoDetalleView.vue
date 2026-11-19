@@ -96,17 +96,14 @@ const loading = ref(true)
 const error = ref(false)
 const agregado = ref(false)
 
+// el botón y la imagen sólo existen con el producto cargado (v-else-if="producto")
 function agregarAlCarrito() {
-  if (!producto.value) return
   carrito.agregarProducto(producto.value)
   agregado.value = true
   setTimeout(() => { agregado.value = false }, 1500)
 }
 
-const imagenResuelta = computed(() => {
-  if (!producto.value) return ''
-  return resolveProductImage(producto.value.imagen_url)
-})
+const imagenResuelta = computed(() => resolveProductImage(producto.value.imagen_url))
 
 const formatTipo = (tipo) => {
   const labels = {

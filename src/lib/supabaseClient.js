@@ -27,17 +27,6 @@ export async function getProductos() {
   return data
 }
 
-/** Obtiene un producto por su ID */
-export async function getProductoById(id) {
-  const { data, error } = await supabase
-    .from('productos')
-    .select('*')
-    .eq('id', id)
-    .single()
-  if (error) throw error
-  return data
-}
-
 /** Obtiene TODOS los productos (activos e inactivos, para admin) */
 export async function getProductosAdmin() {
   const { data, error } = await supabase
@@ -78,26 +67,4 @@ export async function deleteProducto(id) {
     .delete()
     .eq('id', id)
   if (error) throw error
-}
-
-/** Obtiene todos los pedidos (solo admin via RLS) */
-export async function getPedidos() {
-  const { data, error } = await supabase
-    .from('pedidos')
-    .select('*')
-    .order('created_at', { ascending: false })
-  if (error) throw error
-  return data
-}
-
-/** Actualiza el estado de un pedido */
-export async function updatePedidoEstado(id, estado) {
-  const { data, error } = await supabase
-    .from('pedidos')
-    .update({ estado })
-    .eq('id', id)
-    .select()
-    .single()
-  if (error) throw error
-  return data
 }
