@@ -21,3 +21,9 @@ export function siguientePausa(esperado, { cada, luegoCada, desde, hasta } = ESP
   const pausa = esperado < desde ? cada : luegoCada
   return esperado + pausa <= hasta ? pausa : null
 }
+
+/**
+ * Lo que dice la insignia mientras se pregunta: rota cada 3 s entre textos que no afirman que el pago pasó. Los
+ * lectores de pantalla oyen una etiqueta fija («Confirmando el pago»), no un cambio cada 3 s.
+ */
+export const INSIGNIA_DE_ESPERA = { textos: ['Revisando tu pago', 'Espera un momento', 'Seguimos revisando'], cada: 3000 }

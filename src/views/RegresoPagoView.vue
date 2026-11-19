@@ -1,32 +1,20 @@
 <template>
   <main class="regreso">
     <div class="regreso__caja" aria-live="polite">
-      <template v-if="cargando">
-        <EstadoPago estado="confirmando" forma="larga" />
-        <h1>Revisando tu pago</h1>
-        <p class="regreso__texto">Le preguntamos al sistema en qué estado quedó tu pedido.</p>
-      </template>
-
-      <!-- sólo se afirma lo que ya está en la base: el pedido sigue pendiente hasta que llega el aviso de la pasarela -->
-      <template v-else-if="estado === 'confirmando' && agotado">
-        <EstadoPago estado="validando" forma="larga" />
-        <h1>Estamos validando tu pago</h1>
-        <p class="regreso__folio-etiqueta">Folio</p>
-        <p class="regreso__folio">#{{ datos.folio }}</p>
-        <p class="regreso__texto">Esto puede tardar unos minutos. Te enviaremos un correo de confirmación cuando acreditemos
-          tu pago; mientras, puedes ver el estado de tu pedido con tu folio en Rastrear pedido.</p>
-        <ResumenPedido :cotizacion="datos" titulo="" compacto />
-        <BotonPrimario bloque @click="empezar">Volver a revisar</BotonPrimario>
-        <RouterLink to="/seguimiento" class="regreso__liga">Rastrear pedido</RouterLink>
-      </template>
-
-      <template v-else-if="estado === 'confirmando'">
-        <EstadoPago estado="confirmando" forma="larga" />
+      <!-- una sola pantalla mientras se confirma: sólo cambia la insignia, y nada afirma que el pago ya pasó; el pedido
+           sigue pendiente hasta que el aviso de la pasarela llega a la base -->
+      <template v-if="cargando || estado === 'confirmando'">
+        <EstadoPago v-if="agotado" estado="correo" forma="larga" />
+        <EstadoPago v-else estado="confirmando" forma="larga" :texto="INSIGNIA_DE_ESPERA.textos[giro]" />
         <h1>Confirmando tu pago</h1>
-        <p class="regreso__folio-etiqueta">Folio</p>
-        <p class="regreso__folio">#{{ datos.folio }}</p>
-        <p class="regreso__texto">Estamos confirmando tu pago. Esta pantalla se actualiza sola.</p>
-        <ResumenPedido :cotizacion="datos" titulo="" compacto />
+        <template v-if="datos">
+          <p class="regreso__folio-etiqueta">Folio</p>
+          <p class="regreso__folio">#{{ datos.folio }}</p>
+        </template>
+        <p v-if="agotado" class="regreso__texto">Te enviaremos un correo de confirmación cuando acreditemos tu pago.</p>
+        <p v-else class="regreso__texto">Esta pantalla se actualiza sola.</p>
+        <ResumenPedido v-if="datos" :cotizacion="datos" titulo="" compacto />
+        <RouterLink v-if="agotado" to="/seguimiento" class="regreso__liga">Rastrear pedido</RouterLink>
       </template>
 
       <template v-else-if="fallo">
@@ -80,7 +68,7 @@
  * que ella responde. Si la ruta no coincide con ese estado, pasan a la que sí. El carrito se vacía sólo con el pago
  * confirmado.
  */
-import { ref, watch, onBeforeUnmount } from 'vue'
+import { ref, computed, watch, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { consultarRegreso, abrirSesionPago } from '@/lib/api'
 import { formatoFechaHora } from '@/lib/formato'
@@ -88,7 +76,7 @@ import { useCarritoStore } from '@/stores/carritoStore'
 import BotonPrimario from '@/components/compartidos/BotonPrimario.vue'
 import ResumenPedido from '@/components/compartidos/ResumenPedido.vue'
 import EstadoPago from '@/components/compartidos/EstadoPago.vue'
-import { estadoDe, siguientePausa } from '@/lib/regreso.js'
+import { estadoDe, siguientePausa, INSIGNIA_DE_ESPERA } from '@/lib/regreso.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -101,7 +89,7 @@ const estado = ref('')
 const PANTALLA = { confirmado: 'pago-confirmado', confirmando: 'pago-confirmado', pendiente: 'pago-pendiente', error: 'pago-error' }
 
 // mientras el aviso no llega, la pantalla vuelve a preguntar al ritmo de ESPERA_DEL_AVISO (lib/regreso.js); al agotarse
-// se detiene, lo dice y ofrece volver a revisar
+// se detiene y manda a esperar el correo
 const agotado = ref(false)
 let esperado = 0
 let espera = null
@@ -117,7 +105,7 @@ function seguirPreguntando() {
   espera = setTimeout(revisar, pausa)
 }
 
-/** Una ronda completa de consultas, desde ya: al abrir la pantalla, con otra sesión o con «Volver a revisar». */
+/** Una ronda completa de consultas, desde ya: al abrir la pantalla o con otra sesión. */
 function empezar() {
   clearTimeout(espera)
   esperado = 0
@@ -155,7 +143,21 @@ async function revisar() {
 }
 
 watch(() => route.query.session_id, empezar, { immediate: true })
-onBeforeUnmount(() => clearTimeout(espera))
+
+// la insignia rota mientras se pregunta (INSIGNIA_DE_ESPERA); se queda quieta al agotarse o al cambiar de pantalla
+const giro = ref(0)
+let rotacion = null
+const preguntando = computed(() => (cargando.value || estado.value === 'confirmando') && !agotado.value && !fallo.value)
+watch(preguntando, (sigue) => {
+  clearInterval(rotacion)
+  giro.value = 0
+  if (sigue) rotacion = setInterval(() => (giro.value = (giro.value + 1) % INSIGNIA_DE_ESPERA.textos.length), INSIGNIA_DE_ESPERA.cada)
+}, { immediate: true })
+
+onBeforeUnmount(() => {
+  clearTimeout(espera)
+  clearInterval(rotacion)
+})
 
 /**
  * Intentar de nuevo: el mismo pedido abre otra sesión de pago (otro intento en pagos), sin crear un pedido nuevo.

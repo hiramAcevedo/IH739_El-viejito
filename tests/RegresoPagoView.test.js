@@ -48,6 +48,8 @@ const RECHAZADA = {
 
 const Vacia = { render: () => null }
 const titulo = (wrapper) => wrapper.get('h1').text()
+const insigniaVisible = (wrapper) => wrapper.get('.pago > span[aria-hidden="true"]').text()
+const insigniaAccesible = (wrapper) => wrapper.get('.pago .sr-only').text()
 
 let pinia
 async function montar(ruta) {
@@ -85,7 +87,7 @@ afterEach(() => {
 })
 
 describe('RegresoPagoView: pantallas de regreso de la pasarela', () => {
-  it('mientras consulta muestra «Revisando tu pago»; con el cargo aprobado y sin el aviso en la base (pago = paid, estado_pago = pendiente) muestra «Confirmando tu pago» con el folio y no vacía el carrito', async () => {
+  it('mientras corre la primera consulta ya se ve «Confirmando tu pago», sin folio; con el cargo aprobado y sin el aviso en la base (pago = paid, estado_pago = pendiente) aparecen el folio y el resumen, y el carrito no se vacía', async () => {
     let responder
     api.consultarRegreso.mockReturnValueOnce(
       new Promise((resolve) => {
@@ -101,19 +103,36 @@ describe('RegresoPagoView: pantallas de regreso de la pasarela', () => {
 
     const { wrapper, router } = await montar('/pago/confirmado?session_id=cs_test_1')
     expect(api.consultarRegreso).toHaveBeenCalledWith('cs_test_1')
-    expect(titulo(wrapper)).toBe('Revisando tu pago')
+    expect(titulo(wrapper)).toBe('Confirmando tu pago')
+    expect(wrapper.find('.regreso__folio').exists()).toBe(false)
+    expect(insigniaVisible(wrapper)).toBe('Revisando tu pago')
+    expect(wrapper.text()).toContain('Esta pantalla se actualiza sola.')
 
     responder(CONFIRMANDO)
     await flushPromises()
 
     expect(titulo(wrapper)).toBe('Confirmando tu pago')
     expect(wrapper.get('.regreso__folio').text()).toBe('#C41D9A7E')
-    expect(wrapper.text()).toContain('Estamos confirmando tu pago. Esta pantalla se actualiza sola.')
-    // la página sólo afirma lo que ya está en la base: nada de «aprobó el cargo» mientras el pedido sigue pendiente
-    expect(wrapper.text()).not.toMatch(/aprob/i)
+    expect(wrapper.text()).toContain('Esta pantalla se actualiza sola.')
     expect(wrapper.text()).toContain('$1,832.80')
+    // la página sólo afirma lo que ya está en la base: nada de «aprobó» mientras el pedido sigue pendiente
+    expect(wrapper.text()).not.toMatch(/aprob/i)
     expect(router.currentRoute.value.name).toBe('pago-confirmado')
     expect(carrito.items).toHaveLength(1)
+  })
+
+  it('la insignia rota cada 3 s entre textos neutros; los lectores de pantalla oyen siempre la misma etiqueta', async () => {
+    api.consultarRegreso.mockResolvedValue(CONFIRMANDO)
+    const { wrapper } = await montar('/pago/confirmado?session_id=cs_test_1')
+
+    const vistos = [insigniaVisible(wrapper)]
+    for (let i = 0; i < 3; i++) {
+      await vi.advanceTimersByTimeAsync(3000)
+      vistos.push(insigniaVisible(wrapper))
+    }
+    expect(vistos).toEqual(['Revisando tu pago', 'Espera un momento', 'Seguimos revisando', 'Revisando tu pago'])
+    expect(insigniaAccesible(wrapper)).toBe('Confirmando el pago')
+    expect(wrapper.get('.pago > span[aria-hidden="true"]').attributes('aria-hidden')).toBe('true')
   })
 
   it('vuelve a preguntar cada 2 s, no antes; cuando la API responde estado_pago = pagado muestra «Gracias por tu compra», vacía el carrito, borra el pedido en curso y deja de preguntar', async () => {
@@ -154,7 +173,7 @@ describe('RegresoPagoView: pantallas de regreso de la pasarela', () => {
     expect(vi.getTimerCount()).toBe(0)
   })
 
-  it('si el aviso no llega pregunta cada 2 s el primer medio minuto y luego cada 10 s; a los 2 minutos se detiene y lo dice', async () => {
+  it('si el aviso no llega pregunta cada 2 s el primer medio minuto y luego cada 10 s; a los 2 minutos se rinde: la misma pantalla manda a esperar el correo', async () => {
     api.consultarRegreso.mockResolvedValue(CONFIRMANDO)
 
     const { wrapper } = await montar('/pago/confirmado?session_id=cs_test_1')
@@ -171,43 +190,20 @@ describe('RegresoPagoView: pantallas de regreso de la pasarela', () => {
     await vi.advanceTimersByTimeAsync(80000)
     await flushPromises()
     expect(api.consultarRegreso).toHaveBeenCalledTimes(25) // la última, a los 120 s
-    expect(titulo(wrapper)).toBe('Estamos validando tu pago')
-    expect(wrapper.get('.pago').text()).toBe('Validando pago')
-    expect(wrapper.get('.pago').classes()).toContain('pago--validando')
+    expect(titulo(wrapper)).toBe('Confirmando tu pago')
+    expect(wrapper.get('.pago').text()).toBe('Te avisaremos por correo')
+    expect(wrapper.get('.pago').classes()).toContain('pago--correo')
     expect(wrapper.get('.regreso__folio').text()).toBe('#C41D9A7E')
-    expect(wrapper.text()).toContain('Esto puede tardar unos minutos. Te enviaremos un correo de confirmación cuando ' +
-      'acreditemos tu pago; mientras, puedes ver el estado de tu pedido con tu folio en Rastrear pedido.')
-    expect(wrapper.text()).not.toMatch(/aprob/i)
-    expect(wrapper.findAll('button').map((b) => b.text())).toContain('Volver a revisar')
+    expect(wrapper.get('.regreso__texto').text()).toBe('Te enviaremos un correo de confirmación cuando acreditemos tu pago.')
     expect(wrapper.text()).not.toContain('Esta pantalla se actualiza sola.')
+    expect(wrapper.text()).not.toMatch(/aprob/i)
     expect(wrapper.get('a.regreso__liga').attributes('href')).toBe('/seguimiento')
+    expect(wrapper.findAll('button')).toHaveLength(0)
     expect(vi.getTimerCount()).toBe(0)
 
     await vi.advanceTimersByTimeAsync(600000)
     expect(api.consultarRegreso).toHaveBeenCalledTimes(25)
-  })
-
-  it('«Volver a revisar» empieza otra ronda de consultas desde ya; si el aviso llegó, confirma el pago', async () => {
-    api.consultarRegreso.mockResolvedValue(CONFIRMANDO)
-    const { wrapper } = await montar('/pago/confirmado?session_id=cs_test_1')
-    await vi.advanceTimersByTimeAsync(120000)
-    await flushPromises()
-    expect(titulo(wrapper)).toBe('Estamos validando tu pago')
-    const volver = () => wrapper.findAll('button').find((b) => b.text() === 'Volver a revisar')
-
-    await volver().trigger('click')
-    await flushPromises()
-    expect(api.consultarRegreso).toHaveBeenCalledTimes(26)
-    expect(titulo(wrapper)).toBe('Confirmando tu pago')
-    await vi.advanceTimersByTimeAsync(2000)
-    expect(api.consultarRegreso).toHaveBeenCalledTimes(27)
-
-    api.consultarRegreso.mockResolvedValue(PAGADO)
-    await vi.advanceTimersByTimeAsync(2000)
-    await flushPromises()
-    expect(titulo(wrapper)).toBe('Gracias por tu compra')
-    await vi.advanceTimersByTimeAsync(60000)
-    expect(api.consultarRegreso).toHaveBeenCalledTimes(28)
+    expect(wrapper.get('.pago').text()).toBe('Te avisaremos por correo')
   })
 
   it('una red caída durante la espera larga no corta el ciclo: sigue al mismo ritmo y a los 2 minutos muestra el aviso', async () => {
@@ -223,7 +219,8 @@ describe('RegresoPagoView: pantallas de regreso de la pasarela', () => {
     await vi.advanceTimersByTimeAsync(80000)
     await flushPromises()
     expect(api.consultarRegreso).toHaveBeenCalledTimes(25)
-    expect(titulo(wrapper)).toBe('Estamos validando tu pago')
+    expect(titulo(wrapper)).toBe('Confirmando tu pago')
+    expect(wrapper.get('.pago').text()).toBe('Te avisaremos por correo')
     expect(wrapper.text()).not.toContain('No encontramos ese pago')
   })
 

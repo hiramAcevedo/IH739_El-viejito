@@ -1,7 +1,11 @@
 <template>
   <span :class="['pago', `pago--${clave}`]" :title="titulo || undefined">
     <component :is="icono" :size="pequeno ? 14 : 18" aria-hidden="true" :class="{ girando: clave === 'confirmando' }" />
-    {{ etiqueta }}
+    <template v-if="texto">
+      <span aria-hidden="true">{{ texto }}</span>
+      <span class="sr-only">{{ etiqueta }}</span>
+    </template>
+    <template v-else>{{ etiqueta }}</template>
   </span>
 </template>
 
@@ -11,13 +15,16 @@
  * etiqueta del estado logístico, para que "entregado" y "pagado" no se confundan. No depende sólo del color.
  */
 import { computed } from 'vue'
-import { Check, Clock, X, RotateCcw, LoaderCircle } from 'lucide-vue-next'
+import { Check, Clock, X, RotateCcw, LoaderCircle, Mail } from 'lucide-vue-next'
 
 const props = defineProps({
-  estado: { type: String, required: true }, // pagado | pendiente | rechazado | reembolsado | confirmando | validando
+  estado: { type: String, required: true }, // pagado | pendiente | rechazado | reembolsado | confirmando | correo
   forma: { type: String, default: 'corta' }, // corta: tabla del panel · larga: pantallas del comprador
   pequeno: { type: Boolean, default: false },
-  titulo: { type: String, default: '' }
+  titulo: { type: String, default: '' },
+  // un texto visible distinto de la etiqueta, por ejemplo el que rota mientras se pregunta; los lectores de pantalla
+  // siguen oyendo la etiqueta, que no cambia
+  texto: { type: String, default: '' }
 })
 
 const ESTADOS = {
@@ -26,8 +33,8 @@ const ESTADOS = {
   rechazado: { icono: X, corta: 'Rechazado', larga: 'No se pudo cobrar' },
   reembolsado: { icono: RotateCcw, corta: 'Reembolsado', larga: 'Pago reembolsado' },
   confirmando: { icono: LoaderCircle, corta: 'Confirmando', larga: 'Confirmando el pago' },
-  // la espera del aviso se agotó y el pedido sigue pendiente en la base: no se afirma que el pago esté aprobado
-  validando: { icono: Clock, corta: 'Validando', larga: 'Validando pago' }
+  // la espera del aviso se agotó y el pedido sigue pendiente en la base: no se afirma nada del pago
+  correo: { icono: Mail, corta: 'Por correo', larga: 'Te avisaremos por correo' }
 }
 const clave = computed(() => (ESTADOS[props.estado] ? props.estado : 'pendiente'))
 const icono = computed(() => ESTADOS[clave.value].icono)
@@ -45,7 +52,9 @@ const etiqueta = computed(() => ESTADOS[clave.value][props.forma])
 .pago--rechazado { color: var(--color-error); background: #fdecea; }
 .pago--reembolsado { color: #37474f; background: #eceff1; }
 .pago--confirmando { color: var(--color-texto-2); background: var(--color-crema-oscuro); }
-.pago--validando { color: var(--color-texto-2); background: var(--color-crema-oscuro); }
+.pago--correo { color: var(--color-texto-2); background: var(--color-crema-oscuro); }
 .girando { animation: girar 1s linear infinite; }
 @keyframes girar { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .girando { animation: none; } }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 </style>
