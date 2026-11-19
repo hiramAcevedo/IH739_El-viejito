@@ -206,9 +206,7 @@ describe('RegresoPagoView: pantallas de regreso de la pasarela', () => {
     expect(wrapper.get('.pago').text()).toBe('Te avisaremos por correo')
     expect(wrapper.get('.pago').classes()).toContain('pago--correo')
     expect(wrapper.get('.regreso__folio').text()).toBe('#C41D9A7E')
-    expect(wrapper.get('.regreso__texto').text()).toBe('La confirmación está tomando un poco más de tiempo. No tienes que ' +
-      'hacer nada: te enviaremos un correo de confirmación cuando acreditemos tu pago. Mientras, puedes rastrear tu pedido ' +
-      'con tu folio.')
+    expect(wrapper.get('.regreso__texto').text()).toBe('Te enviaremos un correo de confirmación cuando acreditemos tu pago.')
     expect(wrapper.text()).not.toContain('Esta pantalla se actualiza sola.')
     sinTonoDeError(wrapper)
     expect(wrapper.get('a.regreso__liga').attributes('href')).toBe('/seguimiento')

@@ -11,9 +11,7 @@
           <p class="regreso__folio-etiqueta">Folio</p>
           <p class="regreso__folio">#{{ datos.folio }}</p>
         </template>
-        <p v-if="agotado" class="regreso__texto">La confirmación está tomando un poco más de tiempo. No tienes que hacer
-          nada: te enviaremos un correo de confirmación cuando acreditemos tu pago. Mientras, puedes rastrear tu pedido con
-          tu folio.</p>
+        <p v-if="agotado" class="regreso__texto">Te enviaremos un correo de confirmación cuando acreditemos tu pago.</p>
         <p v-else class="regreso__texto">Esta pantalla se actualiza sola.</p>
         <ResumenPedido v-if="datos" :cotizacion="datos" titulo="" compacto />
         <RouterLink v-if="agotado" to="/seguimiento" class="regreso__liga">Rastrear pedido</RouterLink>
