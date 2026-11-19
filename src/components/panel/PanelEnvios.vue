@@ -2,7 +2,7 @@
   <section class="panel-seccion">
     <div class="panel-cabeza">
       <h2 class="panel-titulo">Envíos</h2>
-      <p class="panel-nota">Al registrar la guía, el pedido pasa a enviado y el aviso de envío queda en la cola de correos.</p>
+      <p class="panel-nota">Al registrar la guía, el pedido pasa a enviado y el cliente recibe el aviso de envío por correo.</p>
     </div>
 
     <p v-if="cargando" class="panel-nota">Cargando envíos…</p>
@@ -25,7 +25,7 @@
           <div><dt>Paquetería</dt><dd>{{ e.paqueteria }}</dd></div>
           <div><dt>Guía</dt><dd class="mono">{{ e.guia }}</dd></div>
           <div><dt>Entrega estimada</dt><dd>{{ formatoFecha(`${e.fecha_estimada}T12:00:00-06:00`, { day: 'numeric', month: 'long' }) }}</dd></div>
-          <div v-if="e.aviso"><dt>Aviso de envío</dt><dd>en la cola de correos</dd></div>
+          <div v-if="e.aviso"><dt>Aviso de envío</dt><dd :class="`aviso-${e.aviso}`">{{ AVISOS[e.aviso] || e.aviso }}</dd></div>
         </dl>
 
         <form v-else-if="e.estado_pago === 'pagado'" class="envio__form" @submit.prevent="registrar(e)">
@@ -52,7 +52,8 @@
 <script setup>
 /**
  * Envíos del panel: los pedidos con envío a domicilio, con su dirección en campos propios. Capturar paquetería,
- * guía y fecha estimada mueve el pedido a enviado y deja el aviso de envío en la cola de correos.
+ * guía y fecha estimada mueve el pedido a enviado y manda el aviso de envío; si el correo no sale, queda en la cola
+ * para reintentarse.
  */
 import { ref, reactive, onMounted } from 'vue'
 import { listarEnvios, registrarGuia } from '@/lib/api'
@@ -62,6 +63,8 @@ import EstadoPago from '@/components/compartidos/EstadoPago.vue'
 import BotonPrimario from '@/components/compartidos/BotonPrimario.vue'
 
 const PAQUETERIAS = ['Estafeta', 'DHL', 'FedEx', 'Paquetexpress']
+// el estado del aviso en notificaciones_pedido
+const AVISOS = { en_cola: 'en la cola de correos', enviado: 'enviado al cliente', fallido: 'no salió; queda para reintentar' }
 const auth = useAuthStore()
 const envios = ref([])
 const formas = reactive({})
