@@ -9,7 +9,7 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "test:cobertura": "vitest run --coverage.enabled --coverage.provider=v8 --coverage.include=src/** --coverage.exclude=src/lib/api-ejemplo.js",
+    "test:cobertura": "vitest run --coverage",
     "test:compat": "playwright test -c playwright.compat.config.js"
   },
   "dependencies": {

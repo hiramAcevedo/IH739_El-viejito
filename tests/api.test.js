@@ -141,3 +141,42 @@ describe('api.js (fetch simulado)', () => {
     vi.doUnmock('@/lib/api-ejemplo.js')
   })
 })
+
+describe('api.js: la ruta, el método y el token de cada operación', () => {
+  const T = 'token-de-prueba'
+  it.each([
+    ['crearPedido', [{ items: [] }], 'POST', '/pedidos/crear/', { items: [] }, undefined],
+    ['abrirSesionPago', ['ped-1'], 'POST', '/pagos/sesion/', { pedido_id: 'ped-1' }, undefined],
+    ['consultarSeguimiento', [{ correo: 'a@b.mx', folio: 'ABC12345' }], 'POST', '/pedidos/seguimiento/', { correo: 'a@b.mx', folio: 'ABC12345' }, undefined],
+    ['consultarSeguimientoFirmado', ['ABC 1', 'f/1'], 'GET', '/pedidos/seguimiento/ABC%201/?firma=f%2F1', undefined, undefined],
+    ['leerTextoLegal', ['privacidad'], 'GET', '/legal/privacidad/', undefined, undefined],
+    ['resumenPanel', [T], 'GET', '/admin/resumen/', undefined, T],
+    ['cambiarEstadoPedido', [T, 'ped-1', 'enviado'], 'PATCH', '/admin/pedidos/ped-1/', { estado: 'enviado' }, T],
+    ['listarEnvios', [T], 'GET', '/admin/envios/', undefined, T],
+    ['registrarGuia', [T, 'ped-1', { guia: '1' }], 'POST', '/admin/envios/ped-1/guia/', { guia: '1' }, T],
+    ['listarPagos', [T], 'GET', '/admin/pagos/', undefined, T],
+    ['eventosDePago', [T, 'pg-1'], 'GET', '/admin/pagos/pg-1/eventos/', undefined, T],
+    ['guardarTextoLegal', [T, 'terminos', { titulo: 'T' }], 'PUT', '/admin/legal/terminos/', { titulo: 'T' }, T],
+    ['listarUsuarios', [T], 'GET', '/admin/usuarios/', undefined, T],
+    ['crearUsuario', [T, { nombre: 'A' }], 'POST', '/admin/usuarios/', { nombre: 'A' }, T],
+    ['cambiarUsuario', [T, 'u-1', { estado: 'apagado' }], 'PATCH', '/admin/usuarios/u-1/', { estado: 'apagado' }, T],
+    ['borrarUsuario', [T, 'u-1'], 'DELETE', '/admin/usuarios/u-1/', undefined, T],
+    ['invitarUsuario', [T, { nombre: 'B' }], 'POST', '/admin/invitaciones/', { nombre: 'B' }, T],
+    ['leerInvitacion', ['c/1'], 'GET', '/invitaciones/c%2F1/', undefined, undefined],
+    ['aceptarInvitacion', ['c/1', { nombre: 'C' }], 'POST', '/invitaciones/c%2F1/', { nombre: 'C' }, undefined]
+  ])('%s → %s %s', async (funcion, argumentos, metodo, ruta, cuerpo, token) => {
+    fetchSimulado.mockResolvedValue(json(200, { ok: true }))
+
+    await expect(api[funcion](...argumentos)).resolves.toEqual({ ok: true })
+
+    const [url, opciones] = fetchSimulado.mock.calls[0]
+    expect([url, opciones.method]).toEqual([`${BASE}${ruta}`, metodo])
+    expect(opciones.body === undefined ? undefined : JSON.parse(opciones.body)).toEqual(cuerpo)
+    expect(opciones.headers.Authorization).toBe(token ? `Bearer ${token}` : undefined)
+  })
+
+  it('un error cuyo cuerpo no es un objeto da el mensaje con el código', async () => {
+    fetchSimulado.mockResolvedValue(json(500, null))
+    await expect(api.listarPagos('t')).rejects.toMatchObject({ message: 'La API respondió 500', estado: 500 })
+  })
+})

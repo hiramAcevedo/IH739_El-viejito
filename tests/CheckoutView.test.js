@@ -219,3 +219,63 @@ describe('CheckoutView: validación del formulario', () => {
     expect(router.currentRoute.value.fullPath).toBe('/pago/confirmado?session_id=cs_test_9')
   })
 })
+
+describe('CheckoutView: carrito vacío, datos opcionales y la pasarela externa', () => {
+  it('sin productos invita a volver al catálogo y no pide cotización', async () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const router = createRouter({ history: createMemoryHistory(), routes: [{ path: '/checkout', component: Vacia }, { path: '/productos', component: Vacia }] })
+    router.push('/checkout')
+    await router.isReady()
+    const wrapper = mount(CheckoutView, { global: { plugins: [pinia, router] } })
+    await cotizar()
+
+    expect(wrapper.text()).toContain('No tienes productos en el carrito.')
+    expect(wrapper.find('a[href="/productos"]').exists()).toBe(true)
+    expect(api.calcularPedido).not.toHaveBeenCalled()
+  })
+
+  it('manda el teléfono, las indicaciones y el estado de la dirección, y abre la pasarela externa en la misma pestaña', async () => {
+    api.crearPedido.mockResolvedValue({ id: 'p-nuevo-2', folio: 'D52E0B8F', ...COTIZACION })
+    api.abrirSesionPago.mockResolvedValue({ url: 'https://checkout.stripe.com/c/pay/cs_test_10' })
+    const consola = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { wrapper, router } = await montar()
+    await llenarContacto(wrapper)
+    await wrapper.get('input[value="recoger"]').setValue(true)
+    await wrapper.get('input[value="envio"]').setValue(true)
+    await cotizar()
+    await llenarDireccion(wrapper)
+    await wrapper.get('#estado').setValue('Colima')
+    await wrapper.get('#telefono').setValue(' 3312345678 ')
+    await wrapper.get('#notas').setValue('Tocar el timbre')
+    await wrapper.get('input[type="checkbox"]').setValue(true)
+
+    await wrapper.get('form').trigger('submit')
+    await flushPromises()
+
+    expect(api.crearPedido).toHaveBeenCalledWith(expect.objectContaining({
+      telefono: '3312345678', notas: 'Tocar el timbre', direccion: expect.objectContaining({ estado: 'Colima' })
+    }))
+    // jsdom no navega a otro origen: lo informa en la consola, y el router de la app no se movió
+    expect(consola).toHaveBeenCalledWith(expect.stringContaining('Not implemented: navigation'), undefined)
+    expect(router.currentRoute.value.path).toBe('/checkout')
+  })
+
+  it('si la pasarela no abre, avisa y deja intentar de nuevo', async () => {
+    api.crearPedido.mockResolvedValue({ id: 'p-nuevo-3', folio: 'E63F1C90', ...COTIZACION })
+    api.abrirSesionPago.mockRejectedValueOnce(new Error('La pasarela no respondió.')).mockRejectedValueOnce({})
+    const { wrapper } = await montar()
+    await llenarContacto(wrapper)
+    await llenarDireccion(wrapper)
+    await wrapper.get('input[type="checkbox"]').setValue(true)
+
+    await wrapper.get('form').trigger('submit')
+    await flushPromises()
+    expect(wrapper.get('[role="alert"]').text()).toBe('La pasarela no respondió.')
+    expect(desactivado(wrapper)).toBe(false)
+
+    await wrapper.get('form').trigger('submit')
+    await flushPromises()
+    expect(wrapper.get('[role="alert"]').text()).toBe('No pudimos abrir el pago. Intenta de nuevo.')
+  })
+})

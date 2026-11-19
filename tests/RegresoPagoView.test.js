@@ -236,3 +236,51 @@ describe('RegresoPagoView: pantallas de regreso de la pasarela', () => {
     expect(titulo(wrapper)).toBe('Gracias por tu compra')
   })
 })
+
+describe('RegresoPagoView: intentar de nuevo', () => {
+  const botonReintento = (wrapper) => wrapper.findAll('button').find((b) => b.text().includes('Intentar de nuevo'))
+
+  it('sin el pedido en curso, vuelve al checkout', async () => {
+    api.consultarRegreso.mockResolvedValue(RECHAZADA)
+    const { wrapper, router } = await montar('/pago/error?session_id=cs_test_1')
+
+    await botonReintento(wrapper).trigger('click')
+    await flushPromises()
+    expect(router.currentRoute.value.path).toBe('/checkout')
+    expect(api.abrirSesionPago).not.toHaveBeenCalled()
+  })
+
+  it('con el pedido en curso abre otra sesión del mismo pedido: interna con el router, externa con la pasarela', async () => {
+    sessionStorage.setItem('pedido-en-curso', JSON.stringify({ id: 'ped-7', folio: 'C41D9A7E' }))
+    // la sesión nueva queda abierta; el segundo regreso vuelve a ser uno rechazado
+    api.consultarRegreso.mockResolvedValueOnce(RECHAZADA).mockResolvedValueOnce(ABIERTA).mockResolvedValueOnce(RECHAZADA)
+    api.abrirSesionPago.mockResolvedValueOnce({ url: '/pago/pendiente?session_id=cs_test_2' })
+      .mockResolvedValueOnce({ url: 'https://checkout.stripe.com/c/pay/cs_test_3' })
+    const consola = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { wrapper, router } = await montar('/pago/error?session_id=cs_test_1')
+
+    await botonReintento(wrapper).trigger('click')
+    await flushPromises()
+    expect(api.abrirSesionPago).toHaveBeenCalledWith('ped-7')
+    expect(router.currentRoute.value.fullPath).toBe('/pago/pendiente?session_id=cs_test_2')
+
+    const otra = await montar('/pago/error?session_id=cs_test_1')
+    await botonReintento(otra.wrapper).trigger('click')
+    await flushPromises()
+    expect(consola).toHaveBeenCalledWith(expect.stringContaining('Not implemented: navigation'), undefined)
+  })
+
+  it('si no se puede abrir otra sesión, lo dice', async () => {
+    sessionStorage.setItem('pedido-en-curso', JSON.stringify({ id: 'ped-7', folio: 'C41D9A7E' }))
+    api.consultarRegreso.mockResolvedValue(RECHAZADA)
+    api.abrirSesionPago.mockRejectedValueOnce(new Error('El pedido ya está pagado.')).mockRejectedValueOnce({})
+    const { wrapper } = await montar('/pago/error?session_id=cs_test_1')
+
+    await botonReintento(wrapper).trigger('click')
+    await flushPromises()
+    expect(wrapper.get('[role="alert"]').text()).toBe('El pedido ya está pagado.')
+    await botonReintento(wrapper).trigger('click')
+    await flushPromises()
+    expect(wrapper.get('[role="alert"]').text()).toBe('No pudimos abrir otra sesión de pago.')
+  })
+})

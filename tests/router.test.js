@@ -18,13 +18,10 @@ const supabase = vi.hoisted(() => {
 vi.mock('@/lib/supabaseClient', () => ({
   supabase: supabase.cliente,
   getProductos: vi.fn(async () => []),
-  getProductoById: vi.fn(),
   getProductosAdmin: vi.fn(async () => []),
   createProducto: vi.fn(),
   updateProducto: vi.fn(),
-  deleteProducto: vi.fn(),
-  getPedidos: vi.fn(),
-  updatePedidoEstado: vi.fn()
+  deleteProducto: vi.fn()
 }))
 
 const SIN_SESION = {
@@ -90,5 +87,30 @@ describe('guarda del router para el panel (/admin)', () => {
 
     expect(useAuthStore().isAdmin).toBe(false)
     expect(router.currentRoute.value.fullPath).toBe('/login')
+  })
+})
+
+describe('las rutas del sitio', () => {
+  it('cada ruta carga su vista y pone el título de la pestaña; una ruta desconocida lleva al inicio', async () => {
+    supabase.cliente.auth.getUser.mockResolvedValue(SIN_SESION)
+    const rutas = ['/nosotros', '/productos', '/productos/p-1', '/contacto', '/carrito', '/checkout', '/pago/confirmado',
+      '/pago/pendiente', '/pago/error', '/seguimiento', '/seguimiento/ABC12345', '/privacidad', '/terminos', '/login',
+      '/admin/registro', '/componentes', '/correos']
+    for (const ruta of rutas) {
+      await router.push(ruta)
+      const actual = router.currentRoute.value
+      expect(actual.path).toBe(ruta)
+      expect(actual.matched[0].components.default).toBeTruthy()
+      expect(document.title).toBe(actual.meta.title)
+    }
+    await router.push('/no-existe')
+    expect(router.currentRoute.value.path).toBe('/')
+    expect(document.title).toBe('Inicio | Tequila El Viejito')
+  })
+
+  it('al navegar sube al inicio de la página; con atrás o adelante regresa a donde estaba', () => {
+    const subir = router.options.scrollBehavior
+    expect(subir({}, {}, null)).toEqual({ top: 0, behavior: 'smooth' })
+    expect(subir({}, {}, { left: 0, top: 420 })).toEqual({ left: 0, top: 420 })
   })
 })
