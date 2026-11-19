@@ -96,11 +96,11 @@ const datos = {
   textos: {
     privacidad: {
       clave: 'privacidad', titulo: 'Aviso de privacidad', actualizado: '2026-11-08T12:00:00-06:00',
-      contenido: 'Tequila El Viejito, con domicilio en Tototlán, Jalisco, es responsable de los datos personales que nos compartes al comprar en este sitio.\n\nPara procesar y entregar tu pedido usamos tu nombre, correo, teléfono y, si eliges envío a domicilio, la dirección de entrega. Los usamos también para avisarte del estado de tu pedido. No guardamos los datos de tu tarjeta: el pago lo procesa la pasarela de pago.\n\nSólo compartimos la dirección de entrega con la paquetería que lleva tu pedido. Para acceder a tus datos, corregirlos, cancelarlos u oponerte a su uso, escríbenos a contacto@elviejito.com.'
+      contenido: 'Tequila El Viejito, con domicilio en Tototlán, Jalisco, es responsable de los datos personales que nos compartes al comprar en este sitio.\n\nPara procesar y entregar tu pedido usamos tu nombre, correo, teléfono y, si eliges envío a domicilio, la dirección de entrega. Los usamos también para avisarte del estado de tu pedido. No guardamos los datos de tu tarjeta: el pago lo procesa la pasarela de pago.\n\nSólo compartimos la dirección de entrega con la paquetería que lleva tu pedido. Para acceder a tus datos, corregirlos, cancelarlos u oponerte a su uso, escríbenos a contacto@tequilaelviejito.shop.'
     },
     terminos: {
       clave: 'terminos', titulo: 'Términos de venta', actualizado: '2026-11-08T12:00:00-06:00',
-      contenido: 'La venta de bebidas alcohólicas en este sitio es sólo para mayores de 18 años. Al pagar confirmas que tienes la edad legal para comprar.\n\nLos precios están en pesos mexicanos e incluyen el IVA del 16 %. El importe que se cobra es el que calcula el sistema con los precios vigentes al momento de pagar.\n\nPuedes recibir tu pedido en tu domicilio, con entrega de 3 a 5 días hábiles, o recogerlo en la tienda de Tototlán, Jalisco. Si tu pedido llega dañado o no corresponde a lo que compraste, escríbenos a contacto@elviejito.com con tu folio.'
+      contenido: 'La venta de bebidas alcohólicas en este sitio es sólo para mayores de 18 años. Al pagar confirmas que tienes la edad legal para comprar.\n\nLos precios están en pesos mexicanos e incluyen el IVA del 16 %. El importe que se cobra es el que calcula el sistema con los precios vigentes al momento de pagar.\n\nPuedes recibir tu pedido en tu domicilio, con entrega de 3 a 5 días hábiles, o recogerlo en la tienda de Tototlán, Jalisco. Si tu pedido llega dañado o no corresponde a lo que compraste, escríbenos a contacto@tequilaelviejito.shop con tu folio.'
     },
     leyenda: {
       clave: 'leyenda', titulo: 'Leyenda de venta a mayores', actualizado: '2026-11-08T12:00:00-06:00',

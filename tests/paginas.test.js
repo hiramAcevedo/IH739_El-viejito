@@ -102,6 +102,8 @@ describe('App, NavBar y AppFooter', () => {
     expect(wrapper.find('.footer-leyenda').text()).toBe('Leyenda desde el panel.')
     expect(api.leerTextoLegal).toHaveBeenCalledWith('leyenda')
     expect(wrapper.find('a.whatsapp-float').attributes('href')).toBe('https://wa.me/5213312345678')
+    expect(wrapper.text()).toContain('Email: contacto@tequilaelviejito.shop')
+    expect(wrapper.text()).not.toContain('elviejito.com')
   })
 
   it('en el servidor de desarrollo con datos de ejemplo, el marco lleva la marca de ejemplo', async () => {

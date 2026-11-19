@@ -24,7 +24,7 @@
       </div>
       <div class="footer-contact">
         <h3>Contacto</h3>
-        <p>Email: contacto@elviejito.com</p>
+        <p>Email: contacto@tequilaelviejito.shop</p>
         <p>Tel: +52 (33) 1234-5678</p>
       </div>
     </div>
