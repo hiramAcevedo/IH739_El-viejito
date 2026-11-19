@@ -51,6 +51,18 @@ const titulo = (wrapper) => wrapper.get('h1').text()
 const insigniaVisible = (wrapper) => wrapper.get('.pago > span[aria-hidden="true"]').text()
 const insigniaAccesible = (wrapper) => wrapper.get('.pago .sr-only').text()
 
+/**
+ * La espera agotada se lee neutra: no afirma que el pago pasó ni suena a error. La insignia es la gris de correo, con
+ * su sobre, y en la pantalla no hay alertas ni iconos de alerta.
+ */
+function sinTonoDeError(wrapper) {
+  expect(wrapper.text()).not.toMatch(/aprob|error|problema|fall[oó]/i)
+  expect(wrapper.get('.pago').classes()).toEqual(expect.arrayContaining(['pago', 'pago--correo']))
+  expect(wrapper.get('.pago svg').classes().join(' ')).toMatch(/mail/)
+  expect(wrapper.find('[role="alert"]').exists()).toBe(false)
+  expect(wrapper.html()).not.toMatch(/lucide-(x|circle-alert|triangle-alert|alert)/)
+}
+
 let pinia
 async function montar(ruta) {
   const router = createRouter({
@@ -194,9 +206,11 @@ describe('RegresoPagoView: pantallas de regreso de la pasarela', () => {
     expect(wrapper.get('.pago').text()).toBe('Te avisaremos por correo')
     expect(wrapper.get('.pago').classes()).toContain('pago--correo')
     expect(wrapper.get('.regreso__folio').text()).toBe('#C41D9A7E')
-    expect(wrapper.get('.regreso__texto').text()).toBe('Te enviaremos un correo de confirmación cuando acreditemos tu pago.')
+    expect(wrapper.get('.regreso__texto').text()).toBe('La confirmación está tomando un poco más de tiempo. No tienes que ' +
+      'hacer nada: te enviaremos un correo de confirmación cuando acreditemos tu pago. Mientras, puedes rastrear tu pedido ' +
+      'con tu folio.')
     expect(wrapper.text()).not.toContain('Esta pantalla se actualiza sola.')
-    expect(wrapper.text()).not.toMatch(/aprob/i)
+    sinTonoDeError(wrapper)
     expect(wrapper.get('a.regreso__liga').attributes('href')).toBe('/seguimiento')
     expect(wrapper.findAll('button')).toHaveLength(0)
     expect(vi.getTimerCount()).toBe(0)
@@ -222,6 +236,7 @@ describe('RegresoPagoView: pantallas de regreso de la pasarela', () => {
     expect(titulo(wrapper)).toBe('Confirmando tu pago')
     expect(wrapper.get('.pago').text()).toBe('Te avisaremos por correo')
     expect(wrapper.text()).not.toContain('No encontramos ese pago')
+    sinTonoDeError(wrapper)
   })
 
   it('el ritmo de la espera: 15 pausas de 2 s, 9 de 10 s y ninguna más después de 2 minutos', () => {
