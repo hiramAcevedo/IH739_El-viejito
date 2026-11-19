@@ -45,6 +45,7 @@ registra el pedido y abre la sesión de cobro con la pasarela. El contrato está
 
 | Función del sitio | Ruta de la API | Para qué |
 |---|---|---|
+| `listarProductos` | `GET /productos/` | El catálogo: productos activos con precio, descripción e imagen |
 | `calcularPedido` | `POST /pedidos/calcular/` | El total del carrito con los precios vigentes |
 | `crearPedido` | `POST /pedidos/crear/` | El pedido con la dirección y la confirmación de edad |
 | `abrirSesionPago` | `POST /pagos/sesion/` | La sesión de cobro y la página de pago |
@@ -232,6 +233,15 @@ habilitan las pruebas que las necesitan.
 
 ---
 
+## Rendimiento
+
+El catálogo sale de la API (`GET /productos/`) y supabase-js sólo lo descarga el panel; Swiper llega cuando hay
+productos que mostrar. Inicio, productos y rastrear pedido van con el JavaScript principal; las demás vistas se cargan al
+visitarlas. `vite/primerPintado.js` mete el CSS principal en `index.html` y, en teléfonos, pide la foto del hero de
+productos y nosotros junto con el JavaScript. En inicio, la foto del hero, la de historia y el carrusel se piden después
+del primer pintado, y en productos, el catálogo (`src/lib/pintado.js`). Las fotos están a la medida en que se muestran,
+con una versión de 640 px del hero para teléfonos.
+
 ## Estructura del proyecto
 
 ```
@@ -250,7 +260,7 @@ IH739-IH740_website_El-viejito/
 │   │   ├── api.js                  # El contrato con la API de pedidos y pagos
 │   │   ├── api-ejemplo.js          # Modulo de ejemplo (solo en desarrollo)
 │   │   ├── formato.js              # Moneda y fechas en es-MX
-│   │   ├── supabaseClient.js       # Cliente Supabase: catalogo, productos y sesion del panel
+│   │   ├── supabaseClient.js       # Cliente Supabase del panel: sesion y productos (llega en su propio archivo)
 │   │   └── imageHelper.js          # Resolucion de assets via import.meta.glob
 │   ├── styles/
 │   │   └── variables.css           # Variables de diseno: colores, tipografias y espacios
