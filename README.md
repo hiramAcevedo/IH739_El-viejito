@@ -207,11 +207,16 @@ npm run test
 No leen el `.env`: las variables de prueba están en `vitest.config.js`, y Supabase, la API y `fetch` se simulan, así que
 ninguna prueba sale a la red.
 
-Cobertura de las mismas pruebas, con v8:
+Cobertura de las mismas pruebas, con v8 (la configuración está en `vitest.config.js`):
 
 ```bash
 npm run test:cobertura
 ```
+
+La cobertura usa el remapeo por el AST de v8 (`experimentalAstAwareRemapping`): con el remapeo por omisión, un `.vue`
+que sólo se importa, como el componente perezoso de una ruta, sale cubierto aunque nunca se monte. Fuera de la medición
+quedan `src/main.js`, que sólo monta la app, y lo que existe únicamente en el servidor de desarrollo (los datos de
+ejemplo, su marca y las páginas de muestra de componentes y correos). La corrida falla si las líneas bajan de 95 %.
 
 Pruebas de punta a punta con Playwright, en el Chrome instalado, contra el build de produccion (`npm run build` y
 `npx vite preview --port 5173`), la API en `127.0.0.1:8000` y la CLI de Stripe reenviando los avisos:
