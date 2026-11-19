@@ -116,8 +116,9 @@ describe('App, NavBar y AppFooter', () => {
     expect(wrapper.find('.aviso-ejemplo').text()).toBe('Datos de ejemplo')
   })
 
-  it('el botón de WhatsApp sale en las páginas del comprador y no en el panel ni en su inicio de sesión', async () => {
-    for (const [ruta, sale] of [['/productos', true], ['/login', false], ['/admin', false], ['/admin/registro', false]]) {
+  it('el botón de WhatsApp sale mientras se recorre la tienda y no donde tapa montos o tarjetas', async () => {
+    for (const [ruta, sale] of [['/productos', true], ['/seguimiento', true], ['/login', false], ['/admin', false],
+      ['/admin/registro', false], ['/carrito', false], ['/checkout', false], ['/pago/confirmado', false], ['/pago/error', false]]) {
       const { wrapper } = await montar(App, ruta)
       expect(wrapper.find('a.whatsapp-float').exists(), ruta).toBe(sale)
       wrapper.unmount()

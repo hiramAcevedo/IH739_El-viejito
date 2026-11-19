@@ -30,9 +30,12 @@
     : null
   import { RouterView, useRoute } from 'vue-router'
 
-  // el botón flotante de WhatsApp es para el comprador: en el panel y en su inicio de sesión tapaba las tarjetas
+  // el botón flotante de WhatsApp es para el comprador mientras recorre la tienda. En el panel y en su inicio de sesión
+  // tapaba las tarjetas; en el carrito, el checkout y el regreso del pago tapaba los montos a 360 px
   const route = useRoute()
-  const conWhatsapp = computed(() => route.path !== '/login' && !route.path.startsWith('/admin'))
+  const SIN_WHATSAPP = ['/login', '/carrito', '/checkout']
+  const conWhatsapp = computed(() => !SIN_WHATSAPP.includes(route.path) && !route.path.startsWith('/admin') &&
+    !route.path.startsWith('/pago/'))
 </script>
 
 <style>
