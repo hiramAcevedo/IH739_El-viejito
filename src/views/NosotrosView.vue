@@ -104,7 +104,7 @@ const galleryImages = [
 
 <style scoped>
 .nosotros-page {
-  background-color: #faf7f2;
+  background-color: var(--color-crema);
 }
 
 .hero-section {
@@ -118,11 +118,18 @@ const galleryImages = [
   text-align: center;
   color: white;
 }
+
+/* en teléfonos, la foto del hero en 828 px: la de 1600 px es para pantallas anchas */
+@media (max-width: 828px) {
+  .hero-section {
+    background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('@/assets/hero-nosotros-movil.webp');
+  }
+}
 /* ... resto del CSS igual ... */
 
 .hero-content h1 {
   font-size: 3rem;
-  font-family: Georgia, serif;
+  font-family: var(--fuente-titulos);
   margin-bottom: 1rem;
 }
 
@@ -140,8 +147,8 @@ const galleryImages = [
   text-align: center;
   font-size: 2.5rem;
   margin-bottom: 3rem;
-  font-family: Georgia, serif;
-  color: #1a1a1a;
+  font-family: var(--fuente-titulos);
+  color: var(--color-texto);
 }
 
 .grid {
@@ -158,7 +165,7 @@ const galleryImages = [
 .text-block h2 {
   font-size: 2rem;
   margin-bottom: 1.5rem;
-  color: #c9a84c;
+  color: var(--color-dorado);
 }
 
 .text-block p {
@@ -194,14 +201,14 @@ const galleryImages = [
   display: block;
   font-size: 3rem;
   font-weight: bold;
-  color: #c9a84c;
+  color: var(--color-dorado);
   opacity: 0.3;
   margin-bottom: -1rem;
 }
 
 .proceso-step h3 {
   margin-bottom: 1rem;
-  color: #1a1a1a;
+  color: var(--color-texto);
 }
 
 .gallery-card {

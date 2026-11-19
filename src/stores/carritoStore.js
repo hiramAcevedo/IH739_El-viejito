@@ -6,7 +6,8 @@ const STORAGE_KEY = 'carrito-el-viejito'
 function cargarDesdeStorage() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : []
+    // un carrito guardado antes del sprint 4 trae el precio de cada línea: se descarta, ya no lo decide el navegador
+    return raw ? JSON.parse(raw).map(({ precio, ...item }) => item) : []
   } catch {
     return []
   }
@@ -21,20 +22,16 @@ export const useCarritoStore = defineStore('carrito', () => {
     items.value.reduce((sum, item) => sum + item.cantidad, 0)
   )
 
-  const subtotal = computed(() =>
-    items.value.reduce((sum, item) => sum + Number(item.precio) * item.cantidad, 0)
-  )
-
   // ── Acciones ──
   function agregarProducto(producto) {
     const existente = items.value.find(i => i.id === producto.id)
     if (existente) {
       existente.cantidad++
     } else {
+      // sin precio: el importe del carrito lo calcula la API con los precios vigentes de la base
       items.value.push({
         id: producto.id,
         nombre: producto.nombre,
-        precio: producto.precio,
         imagen_url: producto.imagen_url,
         cantidad: 1
       })
@@ -59,6 +56,11 @@ export const useCarritoStore = defineStore('carrito', () => {
     items.value = []
   }
 
+  /** Lo único que el sitio manda a la API: producto y cantidad. */
+  const paraLaApi = computed(() =>
+    items.value.map(item => ({ producto_id: item.id, cantidad: item.cantidad }))
+  )
+
   // ── Persistencia ──
   watch(items, (val) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(val))
@@ -76,7 +78,7 @@ export const useCarritoStore = defineStore('carrito', () => {
   return {
     items,
     totalItems,
-    subtotal,
+    paraLaApi,
     agregarProducto,
     quitarProducto,
     eliminarProducto,

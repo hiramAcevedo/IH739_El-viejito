@@ -96,17 +96,14 @@ const loading = ref(true)
 const error = ref(false)
 const agregado = ref(false)
 
+// el botón y la imagen sólo existen con el producto cargado (v-else-if="producto")
 function agregarAlCarrito() {
-  if (!producto.value) return
   carrito.agregarProducto(producto.value)
   agregado.value = true
   setTimeout(() => { agregado.value = false }, 1500)
 }
 
-const imagenResuelta = computed(() => {
-  if (!producto.value) return ''
-  return resolveProductImage(producto.value.imagen_url)
-})
+const imagenResuelta = computed(() => resolveProductImage(producto.value.imagen_url))
 
 const formatTipo = (tipo) => {
   const labels = {
@@ -142,7 +139,7 @@ onMounted(async () => {
 
 <style scoped>
 .detalle-page {
-  background-color: #faf7f2;
+  background-color: var(--color-crema);
   min-height: 100vh;
 }
 
@@ -158,7 +155,7 @@ onMounted(async () => {
 
 .spinner {
   border: 4px solid #e8e8e8;
-  border-top: 4px solid #c9a84c;
+  border-top: 4px solid var(--color-dorado);
   border-radius: 50%;
   width: 50px;
   height: 50px;
@@ -172,7 +169,7 @@ onMounted(async () => {
 }
 
 .error-text {
-  color: #d9534f;
+  color: var(--color-error);
   font-size: 1.1rem;
   margin-bottom: 1.5rem;
 }
@@ -180,8 +177,8 @@ onMounted(async () => {
 .btn-back {
   display: inline-block;
   padding: 0.75rem 1.5rem;
-  background: #c9a84c;
-  color: white;
+  background: var(--color-dorado);
+  color: var(--color-texto);
   text-decoration: none;
   border-radius: 4px;
   font-weight: 600;
@@ -243,7 +240,7 @@ onMounted(async () => {
 }
 
 .link-volver {
-  color: #c9a84c;
+  color: var(--color-dorado);
   text-decoration: none;
   font-size: 0.95rem;
   font-weight: 500;
@@ -251,13 +248,13 @@ onMounted(async () => {
 }
 
 .link-volver:hover {
-  color: #b39340;
+  color: var(--color-dorado-hover);
 }
 
 .producto-nombre {
-  font-family: Georgia, serif;
+  font-family: var(--fuente-titulos);
   font-size: 2.5rem;
-  color: #1a1a1a;
+  color: var(--color-texto);
   margin: 0;
   line-height: 1.2;
 }
@@ -265,20 +262,20 @@ onMounted(async () => {
 .producto-precio {
   font-size: 2rem;
   font-weight: 700;
-  color: #c9a84c;
+  color: var(--color-dorado);
   margin: 0;
 }
 
 .producto-descripcion h2,
 .producto-specs h2 {
-  font-family: Georgia, serif;
+  font-family: var(--fuente-titulos);
   font-size: 1.2rem;
-  color: #1a1a1a;
+  color: var(--color-texto);
   margin: 0 0 0.5rem;
 }
 
 .producto-descripcion p {
-  color: #555;
+  color: var(--color-texto-2);
   line-height: 1.7;
   margin: 0;
 }
@@ -289,17 +286,17 @@ onMounted(async () => {
 }
 
 .specs-table tr {
-  border-bottom: 1px solid #e5e0d5;
+  border-bottom: 1px solid var(--color-borde);
 }
 
 .specs-table td {
   padding: 0.75rem 0;
-  color: #555;
+  color: var(--color-texto-2);
 }
 
 .specs-table td:first-child {
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--color-texto);
   width: 40%;
 }
 
@@ -308,8 +305,8 @@ onMounted(async () => {
   align-items: center;
   gap: 0.5rem;
   padding: 1rem 2rem;
-  background: #c9a84c;
-  color: white;
+  background: var(--color-dorado);
+  color: var(--color-texto);
   border: none;
   border-radius: 6px;
   font-weight: 700;
@@ -321,7 +318,7 @@ onMounted(async () => {
 }
 
 .btn-agregar:hover:not(:disabled) {
-  background: #b39340;
+  background: var(--color-dorado-hover);
   transform: translateY(-2px);
 }
 

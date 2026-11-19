@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { getProductos } from '@/lib/supabaseClient'
+import { listarProductos } from '@/lib/api'
 
 /**
  * Store de productos con caché en memoria.
- * Los productos se consultan a Supabase una sola vez por sesión
+ * Los productos se consultan a la API una sola vez por sesión
  * y se sirven desde memoria en navegaciones posteriores.
  * Esto elimina el cold start perceptible del tier gratuito (MJ8).
  */
@@ -15,7 +15,7 @@ export const useProductosStore = defineStore('productos', () => {
   const error = ref(false)
 
   /**
-   * Carga productos desde Supabase o devuelve el caché existente.
+   * Carga los productos de la API o devuelve el caché existente.
    * @param {boolean} force - Forzar recarga ignorando caché
    * @returns {Promise<Array>} Lista de productos activos
    */
@@ -26,7 +26,8 @@ export const useProductosStore = defineStore('productos', () => {
     loading.value = true
     error.value = false
     try {
-      productos.value = await getProductos()
+      // el catálogo sale de la API: las páginas públicas no descargan supabase-js, que sólo usa el panel
+      productos.value = await listarProductos()
       loaded.value = true
       return productos.value
     } catch (err) {
@@ -40,7 +41,7 @@ export const useProductosStore = defineStore('productos', () => {
 
   /**
    * Busca un producto por ID en el caché.
-   * Si no hay caché, carga primero desde Supabase.
+   * Si no hay caché, carga primero de la API.
    * @param {string} id - UUID del producto
    * @returns {Promise<Object|null>} Producto encontrado o null
    */

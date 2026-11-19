@@ -2,15 +2,15 @@
   <main class="admin-container">
     <div class="admin-header">
       <div class="admin-header__content">
-        <h1 class="admin-title">Panel de Administracion</h1>
+        <h1 class="admin-title">Panel de administración</h1>
         <p class="admin-welcome">
-          Bienvenido, <strong>{{ userEmail }}</strong>
+          Bienvenido, <strong>{{ nombreVisible }}</strong> · {{ authStore.esSuperadmin ? 'superadministrador' : 'administrador' }}
         </p>
       </div>
 
       <div class="admin-actions">
         <button
-          v-for="tab in tabs"
+          v-for="tab in tabsVisibles"
           :key="tab.id"
           :class="['tab-btn', { active: activeTab === tab.id }]"
           @click="activeTab = tab.id"
@@ -30,26 +30,31 @@
       <section class="admin-section">
         <h2 class="section-title">Dashboard</h2>
         <div class="admin-grid">
-          <div class="admin-card" @click="activeTab = 'productos'">
-            <div class="card-icon-wrap"><Package :size="32" color="#c9a84c" /></div>
+          <button class="admin-card" @click="activeTab = 'productos'">
+            <div class="card-icon-wrap"><Package :size="32" color="#8a6d1f" /></div>
             <h3>Productos</h3>
             <p>{{ statsProductos }} registrados</p>
-          </div>
-          <div class="admin-card" @click="activeTab = 'pedidos'">
-            <div class="card-icon-wrap"><ClipboardList :size="32" color="#c9a84c" /></div>
+          </button>
+          <button class="admin-card" @click="activeTab = 'pedidos'">
+            <div class="card-icon-wrap"><ClipboardList :size="32" color="#8a6d1f" /></div>
             <h3>Pedidos</h3>
-            <p>{{ statsPedidos }} registrados</p>
-          </div>
-          <div class="admin-card">
-            <div class="card-icon-wrap"><FileText :size="32" color="#c9a84c" /></div>
-            <h3>Contenido</h3>
-            <p>Proximamente</p>
-          </div>
-          <div class="admin-card">
-            <div class="card-icon-wrap"><Users :size="32" color="#c9a84c" /></div>
+            <p>{{ resumen ? `${resumen.pedidos} registrados · ${resumen.por_cobrar} por cobrar` : '…' }}</p>
+          </button>
+          <button class="admin-card" @click="activeTab = 'envios'">
+            <div class="card-icon-wrap"><Truck :size="32" color="#8a6d1f" /></div>
+            <h3>Envíos</h3>
+            <p>{{ resumen ? `${resumen.envios_por_capturar} guía por capturar` : '…' }}</p>
+          </button>
+          <button class="admin-card" @click="activeTab = 'legal'">
+            <div class="card-icon-wrap"><FileText :size="32" color="#8a6d1f" /></div>
+            <h3>Legal</h3>
+            <p>Aviso de privacidad, términos y leyenda</p>
+          </button>
+          <button v-if="authStore.esSuperadmin" class="admin-card" @click="activeTab = 'usuarios'">
+            <div class="card-icon-wrap"><Users :size="32" color="#8a6d1f" /></div>
             <h3>Usuarios</h3>
-            <p>{{ statsAdmins }} administradores</p>
-          </div>
+            <p>{{ resumen ? `${resumen.usuarios} administradores` : '…' }}</p>
+          </button>
         </div>
       </section>
     </div>
@@ -117,96 +122,12 @@
       </section>
     </div>
 
-    <!-- Gestión de Pedidos (PB14) -->
-    <div v-if="activeTab === 'pedidos'" class="admin-content">
-      <section class="admin-section">
-        <div class="section-header">
-          <h2 class="section-title">Gestion de Pedidos</h2>
-          <div class="pedidos-filtros">
-            <button
-              v-for="f in filtrosEstado"
-              :key="f.value"
-              :class="['filtro-estado-btn', { active: filtroPedido === f.value }]"
-              @click="filtroPedido = f.value"
-            >
-              {{ f.label }}
-            </button>
-          </div>
-        </div>
-
-        <div v-if="loadingPedidos" class="loading-inline">
-          <div class="spinner-sm"></div>
-          Cargando pedidos...
-        </div>
-
-        <div v-else-if="pedidosFiltrados.length === 0" class="empty-pedidos">
-          <ClipboardList :size="48" color="#ccc" />
-          <p>No hay pedidos {{ filtroPedido !== 'todos' ? 'con estado "' + filtroPedido + '"' : 'registrados' }}.</p>
-        </div>
-
-        <div v-else class="pedidos-lista">
-          <div
-            v-for="pedido in pedidosFiltrados"
-            :key="pedido.id"
-            class="pedido-card"
-          >
-            <div class="pedido-header">
-              <div class="pedido-info">
-                <span class="pedido-folio">#{{ pedido.id.slice(0, 8).toUpperCase() }}</span>
-                <span :class="['pedido-estado-tag', `estado-${pedido.estado}`]">
-                  {{ pedido.estado }}
-                </span>
-              </div>
-              <span class="pedido-fecha">{{ formatFecha(pedido.created_at) }}</span>
-            </div>
-
-            <div class="pedido-cliente">
-              <p><strong>{{ pedido.cliente_nombre }}</strong></p>
-              <p>{{ pedido.cliente_email }} · {{ pedido.telefono || 'Sin telefono' }}</p>
-              <p class="pedido-entrega">
-                <Truck v-if="pedido.metodo_entrega === 'envio'" :size="14" />
-                <Store v-else :size="14" />
-                {{ pedido.metodo_entrega === 'envio' ? 'Envio a domicilio' : 'Recoger en tienda' }}
-              </p>
-            </div>
-
-            <!-- Detalle de items -->
-            <div v-if="pedido.detalle && pedido.detalle.length" class="pedido-detalle">
-              <div
-                v-for="(item, idx) in pedido.detalle"
-                :key="idx"
-                class="detalle-item"
-              >
-                <span class="detalle-nombre">{{ item.nombre }}</span>
-                <span class="detalle-qty">x{{ item.cantidad }}</span>
-                <span class="detalle-precio">{{ formatPrice(item.subtotal) }}</span>
-              </div>
-            </div>
-
-            <div class="pedido-footer">
-              <span class="pedido-total">Total: {{ formatPrice(pedido.total) }}</span>
-              <div class="pedido-acciones">
-                <select
-                  :value="pedido.estado"
-                  @change="cambiarEstado(pedido.id, $event.target.value)"
-                  class="select-estado"
-                >
-                  <option value="pendiente">Pendiente</option>
-                  <option value="confirmado">Confirmado</option>
-                  <option value="enviado">Enviado</option>
-                  <option value="entregado">Entregado</option>
-                  <option value="cancelado">Cancelado</option>
-                </select>
-              </div>
-            </div>
-
-            <p v-if="pedido.notas" class="pedido-notas">
-              <em>Nota: {{ pedido.notas }}</em>
-            </p>
-          </div>
-        </div>
-      </section>
-    </div>
+    <!-- Las secciones del sprint 4: cada una pide sus datos a la API con la sesión del panel -->
+    <div v-if="activeTab === 'pedidos'" class="admin-content"><PanelPedidos /></div>
+    <div v-if="activeTab === 'envios'" class="admin-content"><PanelEnvios /></div>
+    <div v-if="activeTab === 'pagos'" class="admin-content"><PanelPagos /></div>
+    <div v-if="activeTab === 'legal'" class="admin-content"><PanelLegal /></div>
+    <div v-if="activeTab === 'usuarios' && authStore.esSuperadmin" class="admin-content"><PanelUsuarios /></div>
 
     <!-- Modal Formulario -->
     <Teleport to="body">
@@ -301,10 +222,14 @@ import {
   getProductosAdmin,
   createProducto,
   updateProducto,
-  deleteProducto as deleteProductoDB,
-  getPedidos,
-  updatePedidoEstado
+  deleteProducto as deleteProductoDB
 } from '@/lib/supabaseClient'
+import { resumenPanel } from '@/lib/api'
+import PanelPedidos from '@/components/panel/PanelPedidos.vue'
+import PanelEnvios from '@/components/panel/PanelEnvios.vue'
+import PanelPagos from '@/components/panel/PanelPagos.vue'
+import PanelLegal from '@/components/panel/PanelLegal.vue'
+import PanelUsuarios from '@/components/panel/PanelUsuarios.vue'
 import {
   Package,
   ClipboardList,
@@ -318,28 +243,43 @@ import {
   EyeOff,
   X,
   Truck,
-  Store
+  CreditCard,
+  LayoutDashboard
 } from 'lucide-vue-next'
 
 const router = useRouter()
 const authStore = useAuthStore()
 
-const userEmail = computed(() => authStore.user?.email || 'Admin')
+const nombreVisible = computed(() => authStore.nombre || authStore.user?.email || 'Admin')
 
-// Tabs
+// Pestañas: Usuarios sólo la ve el superadministrador (y la API lo vuelve a comprobar)
 const activeTab = ref('dashboard')
 const tabs = [
-  { id: 'dashboard', label: 'Dashboard', icon: ClipboardList },
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'productos', label: 'Productos', icon: Package },
-  { id: 'pedidos', label: 'Pedidos', icon: ClipboardList }
+  { id: 'pedidos', label: 'Pedidos', icon: ClipboardList },
+  { id: 'envios', label: 'Envíos', icon: Truck },
+  { id: 'pagos', label: 'Pagos', icon: CreditCard },
+  { id: 'legal', label: 'Legal', icon: FileText },
+  { id: 'usuarios', label: 'Usuarios', icon: Users, soloSuperadmin: true }
 ]
+const tabsVisibles = computed(() => tabs.filter((t) => !t.soloSuperadmin || authStore.esSuperadmin))
+
+// Las cuentas del dashboard vienen de la API (antes, el número de administradores estaba escrito en el código)
+const resumen = ref(null)
+async function cargarResumen() {
+  try {
+    resumen.value = await resumenPanel(await authStore.token())
+  } catch (err) {
+    console.error('Error cargando el resumen:', err)
+  }
+}
 
 // Productos
 const productosAdmin = ref([])
 const loadingProductos = ref(false)
 
 const statsProductos = computed(() => productosAdmin.value.length)
-const statsAdmins = ref(2)
 
 const formatTipo = (tipo) => {
   const labels = { blanco: 'Blanco', reposado: 'Reposado', 'añejo': 'Añejo', extra_añejo: 'Extra Añejo' }
@@ -456,53 +396,6 @@ async function eliminarProducto() {
   }
 }
 
-// Pedidos (PB14)
-const pedidosAdmin = ref([])
-const loadingPedidos = ref(false)
-const filtroPedido = ref('todos')
-
-const statsPedidos = computed(() => pedidosAdmin.value.length)
-
-const filtrosEstado = [
-  { value: 'todos', label: 'Todos' },
-  { value: 'pendiente', label: 'Pendiente' },
-  { value: 'confirmado', label: 'Confirmado' },
-  { value: 'enviado', label: 'Enviado' },
-  { value: 'entregado', label: 'Entregado' },
-  { value: 'cancelado', label: 'Cancelado' }
-]
-
-const pedidosFiltrados = computed(() => {
-  if (filtroPedido.value === 'todos') return pedidosAdmin.value
-  return pedidosAdmin.value.filter(p => p.estado === filtroPedido.value)
-})
-
-function formatFecha(iso) {
-  return new Date(iso).toLocaleDateString('es-MX', {
-    day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
-  })
-}
-
-async function cargarPedidos() {
-  loadingPedidos.value = true
-  try {
-    pedidosAdmin.value = await getPedidos()
-  } catch (err) {
-    console.error('Error cargando pedidos:', err)
-  } finally {
-    loadingPedidos.value = false
-  }
-}
-
-async function cambiarEstado(id, nuevoEstado) {
-  try {
-    await updatePedidoEstado(id, nuevoEstado)
-    await cargarPedidos()
-  } catch (err) {
-    console.error('Error al cambiar estado:', err)
-  }
-}
-
 // Logout
 async function handleLogout() {
   const { success } = await authStore.logout()
@@ -513,14 +406,14 @@ async function handleLogout() {
 
 onMounted(() => {
   cargarProductos()
-  cargarPedidos()
+  cargarResumen()
 })
 </script>
 
 <style scoped>
 .admin-container {
   min-height: 100vh;
-  background-color: #faf7f2;
+  background-color: var(--color-crema);
   padding: 5.5rem 1.5rem 2rem;
 }
 
@@ -537,13 +430,13 @@ onMounted(() => {
 .admin-header__content { flex: 1; min-width: 250px; }
 
 .admin-title {
-  font-family: Georgia, serif;
+  font-family: var(--fuente-titulos);
   font-size: 2.2rem;
-  color: #1a1a1a;
+  color: var(--color-texto);
   margin: 0 0 0.25rem;
 }
 
-.admin-welcome { font-size: 0.95rem; color: #666; margin: 0; }
+.admin-welcome { font-size: 0.95rem; color: var(--color-texto-2); margin: 0; }
 
 .admin-actions {
   display: flex;
@@ -556,18 +449,18 @@ onMounted(() => {
   align-items: center;
   gap: 0.4rem;
   padding: 0.6rem 1.1rem;
-  border: 2px solid #e5e0d5;
+  border: 2px solid var(--color-borde);
   background: white;
   border-radius: 6px;
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
-  color: #555;
+  color: var(--color-texto-2);
   transition: all 0.2s;
 }
 
-.tab-btn:hover { border-color: #c9a84c; color: #c9a84c; }
-.tab-btn.active { background: #c9a84c; border-color: #c9a84c; color: white; }
+.tab-btn:hover { border-color: var(--color-dorado); color: var(--color-dorado); }
+.tab-btn.active { background: var(--color-dorado); border-color: var(--color-dorado); color: var(--color-texto); }
 
 .btn-logout {
   display: flex;
@@ -575,7 +468,7 @@ onMounted(() => {
   gap: 0.4rem;
   padding: 0.6rem 1.1rem;
   background: #e8e8e8;
-  color: #555;
+  color: var(--color-texto-2);
   border: none;
   border-radius: 6px;
   font-weight: 600;
@@ -606,9 +499,9 @@ onMounted(() => {
 }
 
 .section-title {
-  font-family: Georgia, serif;
+  font-family: var(--fuente-titulos);
   font-size: 1.5rem;
-  color: #1a1a1a;
+  color: var(--color-texto);
   margin: 0;
 }
 
@@ -621,30 +514,34 @@ onMounted(() => {
 }
 
 .admin-card {
+  font: inherit;
+  width: 100%;
   padding: 1.5rem;
-  background: #faf7f2;
-  border: 2px solid #e5e0d5;
+  background: var(--color-crema);
+  border: 2px solid var(--color-borde);
   border-radius: 6px;
   text-align: center;
   transition: all 0.2s;
   cursor: pointer;
 }
 
+.admin-card:focus-visible { outline: none; box-shadow: var(--enfoque); }
+
 .admin-card:hover {
-  border-color: #c9a84c;
+  border-color: var(--color-dorado);
   transform: translateY(-2px);
 }
 
 .card-icon-wrap { margin-bottom: 0.75rem; }
 
 .admin-card h3 {
-  font-family: Georgia, serif;
+  font-family: var(--fuente-titulos);
   font-size: 1.1rem;
-  color: #1a1a1a;
+  color: var(--color-texto);
   margin: 0 0 0.4rem;
 }
 
-.admin-card p { color: #888; font-size: 0.85rem; margin: 0; }
+.admin-card p { color: var(--color-texto-2); font-size: 0.85rem; margin: 0; }
 
 /* Tabla */
 .tabla-wrapper { overflow-x: auto; }
@@ -658,8 +555,8 @@ onMounted(() => {
 .tabla-productos th {
   text-align: left;
   padding: 0.75rem 1rem;
-  border-bottom: 2px solid #e5e0d5;
-  color: #888;
+  border-bottom: 2px solid var(--color-borde);
+  color: var(--color-texto-2);
   font-weight: 600;
   font-size: 0.8rem;
   text-transform: uppercase;
@@ -672,7 +569,7 @@ onMounted(() => {
   vertical-align: middle;
 }
 
-.td-nombre { font-weight: 600; color: #1a1a1a; }
+.td-nombre { font-weight: 600; color: var(--color-texto); }
 
 .tipo-tag {
   display: inline-block;
@@ -702,18 +599,18 @@ onMounted(() => {
 
 .btn-icon {
   background: none;
-  border: 1px solid #e5e0d5;
+  border: 1px solid var(--color-borde);
   border-radius: 4px;
   padding: 0.4rem;
   cursor: pointer;
-  color: #666;
+  color: var(--color-texto-2);
   display: flex;
   align-items: center;
   transition: all 0.15s;
 }
 
-.btn-icon:hover { border-color: #c9a84c; color: #c9a84c; }
-.btn-danger:hover { border-color: #d9534f; color: #d9534f; }
+.btn-icon:hover { border-color: var(--color-dorado); color: var(--color-dorado); }
+.btn-danger:hover { border-color: var(--color-error); color: var(--color-error); }
 
 /* Buttons */
 .btn-primary {
@@ -721,8 +618,8 @@ onMounted(() => {
   align-items: center;
   gap: 0.4rem;
   padding: 0.65rem 1.2rem;
-  background: #c9a84c;
-  color: white;
+  background: var(--color-dorado);
+  color: var(--color-texto);
   border: none;
   border-radius: 6px;
   font-weight: 600;
@@ -731,13 +628,13 @@ onMounted(() => {
   transition: background 0.2s;
 }
 
-.btn-primary:hover { background: #b39340; }
+.btn-primary:hover { background: var(--color-dorado-hover); }
 .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .btn-secondary {
   padding: 0.65rem 1.2rem;
   background: #e8e8e8;
-  color: #555;
+  color: var(--color-texto-2);
   border: none;
   border-radius: 6px;
   font-weight: 600;
@@ -749,7 +646,7 @@ onMounted(() => {
 
 .btn-danger-solid {
   padding: 0.65rem 1.2rem;
-  background: #d9534f;
+  background: var(--color-error);
   color: white;
   border: none;
   border-radius: 6px;
@@ -767,12 +664,12 @@ onMounted(() => {
   align-items: center;
   gap: 0.75rem;
   padding: 2rem;
-  color: #888;
+  color: var(--color-texto-2);
 }
 
 .spinner-sm {
   border: 3px solid #e8e8e8;
-  border-top: 3px solid #c9a84c;
+  border-top: 3px solid var(--color-dorado);
   border-radius: 50%;
   width: 24px;
   height: 24px;
@@ -820,9 +717,9 @@ onMounted(() => {
 }
 
 .modal-header h3 {
-  font-family: Georgia, serif;
+  font-family: var(--fuente-titulos);
   font-size: 1.3rem;
-  color: #1a1a1a;
+  color: var(--color-texto);
   margin: 0;
 }
 
@@ -833,7 +730,7 @@ onMounted(() => {
 .form-group label {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #555;
+  color: var(--color-texto-2);
 }
 
 .form-group input[type="text"],
@@ -841,7 +738,7 @@ onMounted(() => {
 .form-group textarea,
 .form-group select {
   padding: 0.65rem 0.8rem;
-  border: 2px solid #e5e0d5;
+  border: 2px solid var(--color-borde);
   border-radius: 6px;
   font-size: 0.95rem;
   transition: border-color 0.2s;
@@ -852,7 +749,7 @@ onMounted(() => {
 .form-group textarea:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #c9a84c;
+  border-color: var(--color-dorado);
 }
 
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
@@ -873,168 +770,9 @@ onMounted(() => {
 }
 
 .form-error {
-  color: #d9534f;
+  color: var(--color-error);
   font-size: 0.85rem;
   margin: 0;
-}
-
-/* Pedidos */
-.pedidos-filtros {
-  display: flex;
-  gap: 0.4rem;
-  flex-wrap: wrap;
-}
-
-.filtro-estado-btn {
-  padding: 0.4rem 0.8rem;
-  border: 1px solid #e5e0d5;
-  background: white;
-  border-radius: 16px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  cursor: pointer;
-  color: #888;
-  transition: all 0.2s;
-}
-
-.filtro-estado-btn:hover { border-color: #c9a84c; color: #c9a84c; }
-.filtro-estado-btn.active { background: #c9a84c; border-color: #c9a84c; color: white; }
-
-.empty-pedidos {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  padding: 3rem;
-  text-align: center;
-  color: #888;
-}
-
-.pedidos-lista {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.pedido-card {
-  border: 1px solid #e5e0d5;
-  border-radius: 8px;
-  padding: 1.25rem;
-  transition: border-color 0.2s;
-}
-
-.pedido-card:hover { border-color: #c9a84c; }
-
-.pedido-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.75rem;
-}
-
-.pedido-info {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.pedido-folio {
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: #1a1a1a;
-  font-family: monospace;
-}
-
-.pedido-estado-tag {
-  display: inline-block;
-  padding: 0.2rem 0.6rem;
-  border-radius: 12px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
-
-.estado-pendiente { background: #fff3e0; color: #e65100; }
-.estado-confirmado { background: #e3f2fd; color: #1565c0; }
-.estado-enviado { background: #f3e5f5; color: #6a1b9a; }
-.estado-entregado { background: #e8f5e9; color: #2e7d32; }
-.estado-cancelado { background: #fbe9e7; color: #c62828; }
-
-.pedido-fecha {
-  font-size: 0.8rem;
-  color: #888;
-}
-
-.pedido-cliente p {
-  margin: 0.15rem 0;
-  font-size: 0.9rem;
-  color: #555;
-}
-
-.pedido-entrega {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  color: #888;
-  font-size: 0.82rem;
-  margin-top: 0.25rem;
-}
-
-.pedido-detalle {
-  background: #faf7f2;
-  border-radius: 6px;
-  padding: 0.75rem 1rem;
-  margin: 0.75rem 0;
-}
-
-.detalle-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.3rem 0;
-  font-size: 0.85rem;
-}
-
-.detalle-nombre { flex: 1; color: #1a1a1a; font-weight: 500; }
-.detalle-qty { color: #888; margin: 0 1rem; }
-.detalle-precio { font-weight: 600; color: #1a1a1a; }
-
-.pedido-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 0.75rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid #f0ede7;
-}
-
-.pedido-total {
-  font-weight: 700;
-  font-size: 1rem;
-  color: #1a1a1a;
-}
-
-.select-estado {
-  padding: 0.4rem 0.7rem;
-  border: 1px solid #e5e0d5;
-  border-radius: 6px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  background: white;
-  color: #555;
-}
-
-.select-estado:focus {
-  outline: none;
-  border-color: #c9a84c;
-}
-
-.pedido-notas {
-  font-size: 0.82rem;
-  color: #888;
-  margin: 0.5rem 0 0;
 }
 
 /* Responsive */

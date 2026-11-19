@@ -1,7 +1,7 @@
 <template>
   <main>
     <!-- ── Hero ── -->
-    <section class="hero">
+    <section :class="['hero', { 'hero--foto': pintado }]">
       <div class="hero__overlay"></div>
       <div class="hero__content">
         <p class="hero__eyebrow">Desde 1937</p>
@@ -68,17 +68,15 @@
         <RouterLink to="/nosotros" class="btn-secondary">Conoce nuestra historia</RouterLink>
       </div>
       <div class="welcome__img">
-        <img :src="imgHistoria" alt="Destilería El Viejito" class="welcome__real-img" />
+        <img :src="pintado ? imgHistoria : undefined" alt="Destilería El Viejito" class="welcome__real-img" loading="lazy" decoding="async" />
       </div>
     </section>
   </main>
 </template>
 
 <script setup>
-  import { onMounted, nextTick, watch } from 'vue'
+  import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
   import { RouterLink } from 'vue-router'
-  import Swiper from 'swiper'
-  import { Navigation, Pagination, Autoplay } from 'swiper/modules'
   import 'swiper/css'
   import 'swiper/css/navigation'
   import 'swiper/css/pagination'
@@ -86,6 +84,7 @@
   import imgHistoria from '@/assets/historia.webp'
   import { resolveProductImage } from '@/lib/imageHelper'
   import { useProductosStore } from '@/stores/productosStore'
+  import { despuesDelPintado } from '@/lib/pintado'
 
   const productosStore = useProductosStore()
 
@@ -98,8 +97,12 @@
 
   let swiperInstance = null
 
-  function initSwiper() {
-    if (swiperInstance) swiperInstance.destroy(true, true)
+  let montado = true
+
+  // Swiper llega en su propio archivo, cuando ya hay productos que mostrar
+  async function initSwiper() {
+    const [{ default: Swiper }, { Navigation, Pagination, Autoplay }] = await Promise.all([import('swiper'), import('swiper/modules')])
+    if (!montado) return
     const totalSlides = productosStore.productos.length
     swiperInstance = new Swiper('.product-swiper', {
       modules: [Navigation, Pagination, Autoplay],
@@ -119,12 +122,23 @@
     })
   }
 
+  // el título del hero se pinta primero; la foto de fondo, la de historia y el carrusel se piden después
+  const pintado = ref(false)
+
   onMounted(async () => {
+    await despuesDelPintado()
+    pintado.value = true
     await productosStore.fetchProductos()
     await nextTick()
     if (productosStore.productos.length) {
-      initSwiper()
+      await initSwiper()
     }
+  })
+
+  // al salir de la página, el carrusel deja de avanzar solo y suelta sus eventos
+  onBeforeUnmount(() => {
+    montado = false
+    swiperInstance?.destroy(true, true)
   })
 </script>
 
@@ -137,17 +151,29 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d1f0e 100%);
+    background: linear-gradient(135deg, var(--color-oscuro) 0%, #2d1f0e 100%);
     overflow: hidden;
     text-align: center;
-    color: #f5f0e8;
+    color: var(--color-crema-oscuro);
   }
 
   .hero__overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('@/assets/hero-nosotros.webp') center/cover no-repeat;
+    background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)) center/cover no-repeat;
     opacity: 0.8;
+  }
+
+  /* la foto llega después del primer pintado: el título no la espera */
+  .hero--foto .hero__overlay {
+    background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('@/assets/hero-nosotros.webp');
+  }
+
+  /* en teléfonos, la foto del hero en 828 px: la de 1600 px es para pantallas anchas */
+  @media (max-width: 828px) {
+    .hero--foto .hero__overlay {
+      background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('@/assets/hero-nosotros-movil.webp');
+    }
   }
 
   .hero__content {
@@ -161,12 +187,12 @@
     font-size: 0.85rem;
     letter-spacing: 0.4em;
     text-transform: uppercase;
-    color: #c9a84c;
+    color: var(--color-dorado);
     margin-bottom: 1rem;
   }
 
   .hero__title {
-    font-family: Georgia, serif;
+    font-family: var(--fuente-titulos);
     font-size: clamp(3rem, 8vw, 6rem);
     line-height: 1;
     margin: 0 0 1rem;
@@ -174,7 +200,7 @@
 
   .hero__title em {
     font-style: italic;
-    color: #c9a84c;
+    color: var(--color-dorado);
   }
 
   .hero__subtitle {
@@ -186,8 +212,8 @@
   .hero__cta {
     display: inline-block;
     padding: 0.85rem 2.5rem;
-    background: #c9a84c;
-    color: #1a1a1a;
+    background: var(--color-dorado);
+    color: var(--color-texto);
     text-decoration: none;
     font-weight: 700;
     letter-spacing: 0.1em;
@@ -198,7 +224,7 @@
   }
 
   .hero__cta:hover {
-    background: #e0c068;
+    background: var(--color-dorado-claro);
     transform: translateY(-2px);
   }
 
@@ -226,7 +252,7 @@
     transform: translateX(-50%);
     width: 4px;
     height: 4px;
-    background: #c9a84c;
+    background: var(--color-dorado);
     border-radius: 50%;
     animation: scrollBounce 1.5s infinite;
   }
@@ -244,33 +270,33 @@
   }
 
   .section__title {
-    font-family: Georgia, serif;
+    font-family: var(--fuente-titulos);
     font-size: clamp(1.8rem, 4vw, 2.8rem);
-    color: #1a1a1a;
+    color: var(--color-texto);
     margin-bottom: 0.5rem;
     text-align: center;
   }
 
   .section__subtitle {
     text-align: center;
-    color: #666;
+    color: var(--color-texto-2);
     margin-bottom: 3rem;
   }
 
   /* ── Swiper custom colors ── */
   :deep(.swiper-button-next),
   :deep(.swiper-button-prev) {
-    color: #c9a84c;
+    color: var(--color-dorado);
   }
 
   :deep(.swiper-pagination-bullet-active) {
-    background: #c9a84c;
+    background: var(--color-dorado);
   }
 
   .slider-loading {
     text-align: center;
     padding: 3rem;
-    color: #888;
+    color: var(--color-texto-2);
   }
 
   /* ── Product card ── */
@@ -317,13 +343,13 @@
 
   .product-card__info h3 {
     margin: 0 0 0.4rem;
-    font-family: Georgia, serif;
-    color: #1a1a1a;
+    font-family: var(--fuente-titulos);
+    color: var(--color-texto);
   }
 
   .product-card__info p {
     font-size: 0.9rem;
-    color: #555;
+    color: var(--color-texto-2);
     margin: 0 0 0.6rem;
     flex: 1;
     min-height: 3.5em;
@@ -332,7 +358,7 @@
   .product-card__price {
     font-size: 1.1rem;
     font-weight: 700;
-    color: #c9a84c;
+    color: var(--color-dorado-texto);
   }
 
   /* Espacio para hover y paginación debajo de las cards */
@@ -349,9 +375,10 @@
   }
 
   /* ── Welcome ── */
+  /* minmax(0, 1fr): una columna no crece por el ancho mínimo de lo que lleva (la imagen, mientras llega) */
   .welcome {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 4rem;
     align-items: center;
   }
@@ -365,8 +392,8 @@
   .btn-secondary {
     display: inline-block;
     padding: 0.75rem 2rem;
-    border: 2px solid #c9a84c;
-    color: #c9a84c;
+    border: 2px solid var(--color-dorado);
+    color: var(--color-dorado-texto);
     text-decoration: none;
     font-weight: 600;
     font-size: 0.9rem;
@@ -376,8 +403,8 @@
   }
 
   .btn-secondary:hover {
-    background: #c9a84c;
-    color: #1a1a1a;
+    background: var(--color-dorado);
+    color: var(--color-texto);
   }
 
   .welcome__real-img {
@@ -390,7 +417,7 @@
 
   @media (max-width: 768px) {
     .welcome {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
   }
 </style>

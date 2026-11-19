@@ -13,30 +13,8 @@ if (!supabaseUrl || !supabaseAnonKey) {
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // ──────────────────────────────────────────────
-// Helpers de ejemplo para las tablas del Sprint 1
+// Los productos del panel (el catálogo público sale de la API)
 // ──────────────────────────────────────────────
-
-/** Obtiene todos los productos activos (vista publica) */
-export async function getProductos() {
-  const { data, error } = await supabase
-    .from('productos')
-    .select('*')
-    .eq('activo', true)
-    .order('nombre')
-  if (error) throw error
-  return data
-}
-
-/** Obtiene un producto por su ID */
-export async function getProductoById(id) {
-  const { data, error } = await supabase
-    .from('productos')
-    .select('*')
-    .eq('id', id)
-    .single()
-  if (error) throw error
-  return data
-}
 
 /** Obtiene TODOS los productos (activos e inactivos, para admin) */
 export async function getProductosAdmin() {
@@ -78,37 +56,4 @@ export async function deleteProducto(id) {
     .delete()
     .eq('id', id)
   if (error) throw error
-}
-
-/** Crea un pedido desde el checkout
- *  El cliente debe generar el id (crypto.randomUUID()) y mandarlo en el objeto.
- *  No usamos .select() para no requerir SELECT policy en anon (RLS). */
-export async function createPedido(pedido) {
-  const { error } = await supabase
-    .from('pedidos')
-    .insert(pedido)
-  if (error) throw error
-  return { id: pedido.id }
-}
-
-/** Obtiene todos los pedidos (solo admin via RLS) */
-export async function getPedidos() {
-  const { data, error } = await supabase
-    .from('pedidos')
-    .select('*')
-    .order('created_at', { ascending: false })
-  if (error) throw error
-  return data
-}
-
-/** Actualiza el estado de un pedido */
-export async function updatePedidoEstado(id, estado) {
-  const { data, error } = await supabase
-    .from('pedidos')
-    .update({ estado })
-    .eq('id', id)
-    .select()
-    .single()
-  if (error) throw error
-  return data
 }

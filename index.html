@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Tequila El Viejito — Tradición destilada desde 1952, Jalisco, México." />
-    <link rel="icon" href="/favicon.ico" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- el catálogo sale de Supabase y la leyenda de la API: la conexión se abre mientras llega el JavaScript -->
+    <link rel="preconnect" href="%VITE_SUPABASE_URL%" crossorigin />
+    <link rel="preconnect" href="%VITE_API_URL%" crossorigin />
     <title>Tequila El Viejito</title>
   </head>
   <body>

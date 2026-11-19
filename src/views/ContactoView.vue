@@ -123,7 +123,7 @@ const handleSubmit = async () => {
 
 <style scoped>
 .contacto-page {
-  background-color: #faf7f2;
+  background-color: var(--color-crema);
 }
 
 .hero-section {
@@ -140,7 +140,7 @@ const handleSubmit = async () => {
 
 .hero-content h1 {
   font-size: 3rem;
-  font-family: Georgia, serif;
+  font-family: var(--fuente-titulos);
 }
 
 .contacto-container {
@@ -166,8 +166,8 @@ const handleSubmit = async () => {
 .form-wrapper h2 {
   font-size: 2rem;
   margin-bottom: 2rem;
-  color: #1a1a1a;
-  font-family: Georgia, serif;
+  color: var(--color-texto);
+  font-family: var(--fuente-titulos);
 }
 
 .contacto-form {
@@ -199,7 +199,7 @@ input, textarea {
 
 input:focus, textarea:focus {
   outline: none;
-  border-color: #c9a84c;
+  border-color: var(--color-dorado);
 }
 
 input.error, textarea.error {
@@ -216,8 +216,8 @@ input.error, textarea.error {
 .submit-btn {
   width: 100%;
   padding: 1rem;
-  background-color: #c9a84c;
-  color: white;
+  background-color: var(--color-dorado);
+  color: var(--color-texto);
   border: none;
   border-radius: 6px;
   font-size: 1rem;
@@ -245,11 +245,11 @@ input.error, textarea.error {
 .info-item h3 {
   font-size: 1.5rem;
   margin-bottom: 1rem;
-  color: #1a1a1a;
+  color: var(--color-texto);
 }
 
 .info-item p {
-  color: #666;
+  color: var(--color-texto-2);
   margin-bottom: 2rem;
 }
 

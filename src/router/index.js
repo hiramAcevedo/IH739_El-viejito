@@ -1,5 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
+// las puertas de entrada directas (inicio, el catálogo y el rastreo) van con el JavaScript principal: al abrirlas no
+// hace falta otra vuelta al servidor por su vista; las demás se cargan cuando se visitan
+import ProductosView from '@/views/ProductosView.vue'
+import SeguimientoView from '@/views/SeguimientoView.vue'
 import { useAuthStore } from '@/stores/authStore'
 
 const routes = [
@@ -19,7 +23,7 @@ const routes = [
   {
     path: '/productos',
     name: 'productos',
-    component: () => import('@/views/ProductosView.vue'),
+    component: ProductosView,
     meta: { title: 'Productos | Tequila El Viejito' }
   },
   {
@@ -48,10 +52,62 @@ const routes = [
     meta: { title: 'Checkout | Tequila El Viejito' }
   },
   {
+    // Las tres pantallas de regreso de la pasarela comparten la vista: el estado lo dice la API, no la ruta
+    path: '/pago/confirmado',
+    name: 'pago-confirmado',
+    component: () => import('@/views/RegresoPagoView.vue'),
+    meta: { title: 'Pago confirmado | Tequila El Viejito' }
+  },
+  {
+    path: '/pago/pendiente',
+    name: 'pago-pendiente',
+    component: () => import('@/views/RegresoPagoView.vue'),
+    meta: { title: 'Pago pendiente | Tequila El Viejito' }
+  },
+  {
+    path: '/pago/error',
+    name: 'pago-error',
+    component: () => import('@/views/RegresoPagoView.vue'),
+    meta: { title: 'No se pudo cobrar | Tequila El Viejito' }
+  },
+  {
+    // Seguimiento sin cuenta: correo y folio, o la liga firmada del correo de confirmación
+    path: '/seguimiento',
+    name: 'seguimiento',
+    component: SeguimientoView,
+    meta: { title: 'Rastrear pedido | Tequila El Viejito' }
+  },
+  {
+    path: '/seguimiento/:folio',
+    name: 'seguimiento-detalle',
+    component: () => import('@/views/SeguimientoDetalleView.vue'),
+    meta: { title: 'Tu pedido | Tequila El Viejito' }
+  },
+  {
+    // Avisos legales: el texto lo da la API y se edita desde el panel
+    path: '/privacidad',
+    name: 'privacidad',
+    component: () => import('@/views/LegalView.vue'),
+    meta: { title: 'Aviso de privacidad | Tequila El Viejito', clave: 'privacidad' }
+  },
+  {
+    path: '/terminos',
+    name: 'terminos',
+    component: () => import('@/views/LegalView.vue'),
+    meta: { title: 'Términos de venta | Tequila El Viejito', clave: 'terminos' }
+  },
+  {
     path: '/login',
     name: 'login',
     component: () => import('@/views/LoginView.vue'),
     meta: { title: 'Login | Tequila El Viejito' }
+  },
+  {
+    // La liga de invitación que genera el superadministrador: pública, la valida la API
+    path: '/admin/registro',
+    name: 'registro-invitacion',
+    component: () => import('@/views/RegistroInvitacionView.vue'),
+    meta: { title: 'Crea tu cuenta | Tequila El Viejito' }
   },
   {
     path: '/admin',
@@ -59,6 +115,13 @@ const routes = [
     component: () => import('@/views/AdminView.vue'),
     meta: { title: 'Panel de Administración | Tequila El Viejito', requiresAuth: true }
   },
+  // Página de muestra de los componentes compartidos: sólo en el servidor de desarrollo
+  ...(import.meta.env.DEV
+    ? [
+        { path: '/componentes', name: 'componentes', component: () => import('@/views/ComponentesView.vue'), meta: { title: 'Componentes | Tequila El Viejito' } },
+        { path: '/correos', name: 'correos', component: () => import('@/views/CorreosView.vue'), meta: { title: 'Correos | Tequila El Viejito' } }
+      ]
+    : []),
   {
     // Catch-all: redirige rutas desconocidas al home
     path: '/:pathMatch(.*)*',

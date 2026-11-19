@@ -62,7 +62,8 @@
     { name: 'home',      path: '/',          label: 'Inicio'    },
     { name: 'nosotros',  path: '/nosotros',  label: 'Nosotros'  },
     { name: 'productos', path: '/productos', label: 'Productos' },
-    { name: 'contacto',  path: '/contacto',  label: 'Contacto'  }
+    { name: 'contacto',  path: '/contacto',  label: 'Contacto'  },
+    { name: 'seguimiento', path: '/seguimiento', label: 'Rastrear pedido' }
   ]
 
   function toggleMenu() {
@@ -121,14 +122,14 @@
   .navbar__logo-text {
     font-size: 1.4rem;
     font-weight: 700;
-    color: #c9a84c;
+    color: var(--color-dorado);
     letter-spacing: 0.05em;
-    font-family: Georgia, serif;
+    font-family: var(--fuente-titulos);
   }
 
   .navbar__logo-sub {
     font-size: 0.65rem;
-    color: #f5f0e8;
+    color: var(--color-crema-oscuro);
     letter-spacing: 0.3em;
     text-transform: uppercase;
   }
@@ -143,7 +144,7 @@
   }
 
   .navbar__link {
-    color: #f5f0e8;
+    color: var(--color-crema-oscuro);
     text-decoration: none;
     font-size: 0.95rem;
     letter-spacing: 0.08em;
@@ -155,8 +156,8 @@
 
   .navbar__link:hover,
   .navbar__link--active {
-    color: #c9a84c;
-    border-bottom-color: #c9a84c;
+    color: var(--color-dorado);
+    border-bottom-color: var(--color-dorado);
   }
 
   /* ── Right section (cart + burger) ── */
@@ -172,22 +173,22 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #f5f0e8;
+    color: var(--color-crema-oscuro);
     text-decoration: none;
     transition: color 0.2s;
     padding: 4px;
   }
 
   .navbar__cart:hover {
-    color: #c9a84c;
+    color: var(--color-dorado);
   }
 
   .navbar__cart-badge {
     position: absolute;
     top: -5px;
     right: -8px;
-    background: #c9a84c;
-    color: #1a1a1a;
+    background: var(--color-dorado);
+    color: var(--color-texto);
     font-size: 0.65rem;
     font-weight: 700;
     border-radius: 50%;
@@ -213,7 +214,7 @@
   .navbar__burger-bar {
     width: 26px;
     height: 2px;
-    background: #f5f0e8;
+    background: var(--color-crema-oscuro);
     border-radius: 2px;
     transition: transform 0.3s, opacity 0.3s;
   }

@@ -1,0 +1,199 @@
+<template>
+  <main class="regreso">
+    <div class="regreso__caja" aria-live="polite">
+      <!-- una sola pantalla mientras se confirma: sólo cambia la insignia, y nada afirma que el pago ya pasó; el pedido
+           sigue pendiente hasta que el aviso de la pasarela llega a la base -->
+      <template v-if="cargando || estado === 'confirmando'">
+        <EstadoPago v-if="agotado" estado="correo" forma="larga" />
+        <EstadoPago v-else estado="confirmando" forma="larga" :texto="INSIGNIA_DE_ESPERA.textos[giro]" />
+        <h1>Confirmando tu pago</h1>
+        <template v-if="datos">
+          <p class="regreso__folio-etiqueta">Folio</p>
+          <p class="regreso__folio">#{{ datos.folio }}</p>
+        </template>
+        <p v-if="agotado" class="regreso__texto">Te enviaremos un correo de confirmación cuando acreditemos tu pago.</p>
+        <p v-else class="regreso__texto">Esta pantalla se actualiza sola.</p>
+        <ResumenPedido v-if="datos" :cotizacion="datos" titulo="" compacto />
+        <RouterLink v-if="agotado" to="/seguimiento" class="regreso__liga">Rastrear pedido</RouterLink>
+      </template>
+
+      <template v-else-if="fallo">
+        <h1>No encontramos ese pago</h1>
+        <p class="regreso__texto">{{ fallo }}</p>
+        <BotonPrimario to="/carrito" bloque>Volver al carrito</BotonPrimario>
+      </template>
+
+      <template v-else-if="estado === 'confirmado'">
+        <EstadoPago estado="pagado" forma="larga" />
+        <h1>Gracias por tu compra</h1>
+        <p class="regreso__folio-etiqueta">Folio</p>
+        <p class="regreso__folio">#{{ datos.folio }}</p>
+        <p class="regreso__texto">Guarda tu folio: con él y tu correo puedes seguir tu pedido.</p>
+        <ResumenPedido :cotizacion="datos" titulo="" />
+        <BotonPrimario to="/seguimiento" bloque>Seguir mi pedido</BotonPrimario>
+        <RouterLink to="/productos" class="regreso__liga">Seguir comprando</RouterLink>
+      </template>
+
+      <template v-else-if="estado === 'pendiente'">
+        <EstadoPago estado="pendiente" forma="larga" />
+        <h1>Completa tu pago</h1>
+        <p class="regreso__folio-etiqueta">Folio</p>
+        <p class="regreso__folio">#{{ datos.folio }}</p>
+        <div class="regreso__recuadro">
+          <p>Tu pedido está registrado, pero el pago todavía no se completa.</p>
+          <p v-if="datos.vence">La sesión de pago sigue abierta hasta el <strong>{{ formatoFechaHora(datos.vence) }}</strong></p>
+        </div>
+        <ResumenPedido :cotizacion="datos" titulo="" compacto />
+        <BotonPrimario :href="datos.url" :to="datos.url?.startsWith('/') ? datos.url : null" bloque>Completar el pago</BotonPrimario>
+        <p class="regreso__pie">El pedido se confirma al recibir el pago.</p>
+      </template>
+
+      <template v-else>
+        <EstadoPago estado="rechazado" forma="larga" />
+        <h1>El cobro no se completó</h1>
+        <p class="regreso__texto">La sesión de pago venció o el banco no autorizó el cargo. Tu carrito sigue igual.</p>
+        <ResumenPedido :cotizacion="datos" titulo="" compacto />
+        <BotonPrimario bloque :cargando="reintentando" @click="reintentar">Intentar de nuevo</BotonPrimario>
+        <p v-if="errorReintento" class="regreso__pie" role="alert">{{ errorReintento }}</p>
+        <BotonPrimario to="/carrito" variante="secundario" bloque>Volver al carrito</BotonPrimario>
+      </template>
+    </div>
+  </main>
+</template>
+
+<script setup>
+/**
+ * Las tres pantallas de regreso de la pasarela: /pago/confirmado, /pago/pendiente y /pago/error.
+ * No dan el cobro por hecho porque el comprador volvió: le preguntan a la API el estado de la sesión y muestran el
+ * que ella responde. Si la ruta no coincide con ese estado, pasan a la que sí. El carrito se vacía sólo con el pago
+ * confirmado.
+ */
+import { ref, computed, watch, onBeforeUnmount } from 'vue'
+import { useRoute, useRouter, RouterLink } from 'vue-router'
+import { consultarRegreso, abrirSesionPago } from '@/lib/api'
+import { formatoFechaHora } from '@/lib/formato'
+import { useCarritoStore } from '@/stores/carritoStore'
+import BotonPrimario from '@/components/compartidos/BotonPrimario.vue'
+import ResumenPedido from '@/components/compartidos/ResumenPedido.vue'
+import EstadoPago from '@/components/compartidos/EstadoPago.vue'
+import { estadoDe, siguientePausa, INSIGNIA_DE_ESPERA } from '@/lib/regreso.js'
+
+const route = useRoute()
+const router = useRouter()
+const carrito = useCarritoStore()
+const cargando = ref(true)
+const fallo = ref('')
+const datos = ref(null)
+const estado = ref('')
+
+const PANTALLA = { confirmado: 'pago-confirmado', confirmando: 'pago-confirmado', pendiente: 'pago-pendiente', error: 'pago-error' }
+
+// mientras el aviso no llega, la pantalla vuelve a preguntar al ritmo de ESPERA_DEL_AVISO (lib/regreso.js); al agotarse
+// se detiene y manda a esperar el correo
+const agotado = ref(false)
+let esperado = 0
+let espera = null
+function seguirPreguntando() {
+  clearTimeout(espera)
+  if (estado.value !== 'confirmando') return
+  const pausa = siguientePausa(esperado)
+  if (pausa === null) {
+    agotado.value = true
+    return
+  }
+  esperado += pausa
+  espera = setTimeout(revisar, pausa)
+}
+
+/** Una ronda completa de consultas, desde ya: al abrir la pantalla o con otra sesión. */
+function empezar() {
+  clearTimeout(espera)
+  esperado = 0
+  agotado.value = false
+  revisar()
+}
+
+async function revisar() {
+  cargando.value = !datos.value
+  fallo.value = ''
+  const sesion = route.query.session_id
+  if (!sesion) {
+    fallo.value = 'La dirección no trae la sesión de pago.'
+    cargando.value = false
+    return
+  }
+  try {
+    datos.value = await consultarRegreso(sesion)
+    estado.value = estadoDe(datos.value)
+    if (route.name !== PANTALLA[estado.value]) {
+      router.replace({ name: PANTALLA[estado.value], query: route.query })
+    }
+    if (estado.value === 'confirmado') {
+      carrito.vaciarCarrito()
+      sessionStorage.removeItem('pedido-en-curso')
+    }
+    seguirPreguntando()
+  } catch (e) {
+    // si se cae una consulta mientras se confirma, la pantalla sigue preguntando, como promete («se actualiza sola»)
+    if (estado.value === 'confirmando') seguirPreguntando()
+    else fallo.value = e.message || 'No pudimos revisar el pago.'
+  } finally {
+    cargando.value = false
+  }
+}
+
+watch(() => route.query.session_id, empezar, { immediate: true })
+
+// la insignia rota mientras se pregunta (INSIGNIA_DE_ESPERA); se queda quieta al agotarse o al cambiar de pantalla
+const giro = ref(0)
+let rotacion = null
+const preguntando = computed(() => (cargando.value || estado.value === 'confirmando') && !agotado.value && !fallo.value)
+watch(preguntando, (sigue) => {
+  clearInterval(rotacion)
+  giro.value = 0
+  if (sigue) rotacion = setInterval(() => (giro.value = (giro.value + 1) % INSIGNIA_DE_ESPERA.textos.length), INSIGNIA_DE_ESPERA.cada)
+}, { immediate: true })
+
+onBeforeUnmount(() => {
+  clearTimeout(espera)
+  clearInterval(rotacion)
+})
+
+/**
+ * Intentar de nuevo: el mismo pedido abre otra sesión de pago (otro intento en pagos), sin crear un pedido nuevo.
+ * Si el navegador ya no tiene el pedido en curso, se vuelve al checkout.
+ */
+const reintentando = ref(false)
+const errorReintento = ref('')
+async function reintentar() {
+  const enCurso = JSON.parse(sessionStorage.getItem('pedido-en-curso') || 'null')
+  if (!enCurso) return router.push('/checkout')
+  reintentando.value = true
+  errorReintento.value = ''
+  try {
+    const sesion = await abrirSesionPago(enCurso.id)
+    if (sesion.url.startsWith('/')) router.push(sesion.url)
+    else window.location.assign(sesion.url)
+  } catch (e) {
+    errorReintento.value = e.message || 'No pudimos abrir otra sesión de pago.'
+    reintentando.value = false
+  }
+}
+</script>
+
+<style scoped>
+.regreso { min-height: 100vh; background: var(--color-crema); padding: 6.5rem var(--espacio-4) var(--espacio-8); }
+.regreso__caja {
+  max-width: 520px; margin: 0 auto; background: var(--color-blanco); border-radius: var(--radio-grande);
+  box-shadow: var(--sombra); padding: var(--espacio-6) var(--espacio-5); display: flex; flex-direction: column; gap: var(--espacio-4);
+}
+.regreso__caja > :first-child { align-self: flex-start; }
+.regreso h1 { font-family: var(--fuente-titulos); font-size: 2rem; line-height: 1.15; color: var(--color-texto); }
+.regreso__texto { color: var(--color-texto-2); font-size: 1.05rem; }
+.regreso__folio-etiqueta { color: var(--color-texto-2); margin-bottom: calc(-1 * var(--espacio-4)); }
+.regreso__folio { font-family: var(--fuente-mono); font-size: 2.1rem; font-weight: 700; color: var(--color-texto); letter-spacing: 0.04em; }
+.regreso__recuadro { background: var(--color-crema-oscuro); border: 1px solid var(--color-borde); border-radius: var(--radio-grande); padding: var(--espacio-4); color: var(--color-texto); }
+.regreso__recuadro p + p { margin-top: var(--espacio-2); }
+.regreso__liga { text-align: center; color: var(--color-texto-2); font-weight: 600; }
+.regreso__pie { text-align: center; color: var(--color-texto-2); font-size: 0.9rem; }
+</style>
