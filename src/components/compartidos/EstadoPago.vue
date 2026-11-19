@@ -14,7 +14,7 @@ import { computed } from 'vue'
 import { Check, Clock, X, RotateCcw, LoaderCircle } from 'lucide-vue-next'
 
 const props = defineProps({
-  estado: { type: String, required: true }, // pagado | pendiente | rechazado | reembolsado | confirmando
+  estado: { type: String, required: true }, // pagado | pendiente | rechazado | reembolsado | confirmando | aprobado
   forma: { type: String, default: 'corta' }, // corta: tabla del panel · larga: pantallas del comprador
   pequeno: { type: Boolean, default: false },
   titulo: { type: String, default: '' }
@@ -25,7 +25,9 @@ const ESTADOS = {
   pendiente: { icono: Clock, corta: 'Pendiente', larga: 'Pago pendiente' },
   rechazado: { icono: X, corta: 'Rechazado', larga: 'No se pudo cobrar' },
   reembolsado: { icono: RotateCcw, corta: 'Reembolsado', larga: 'Pago reembolsado' },
-  confirmando: { icono: LoaderCircle, corta: 'Confirmando', larga: 'Confirmando el pago' }
+  confirmando: { icono: LoaderCircle, corta: 'Confirmando', larga: 'Confirmando el pago' },
+  // la pasarela aprobó el cargo, pero su aviso todavía no llega a la base
+  aprobado: { icono: Check, corta: 'Aprobado', larga: 'Pago aprobado' }
 }
 const clave = computed(() => (ESTADOS[props.estado] ? props.estado : 'pendiente'))
 const icono = computed(() => ESTADOS[clave.value].icono)
@@ -43,6 +45,7 @@ const etiqueta = computed(() => ESTADOS[clave.value][props.forma])
 .pago--rechazado { color: var(--color-error); background: #fdecea; }
 .pago--reembolsado { color: #37474f; background: #eceff1; }
 .pago--confirmando { color: var(--color-texto-2); background: var(--color-crema-oscuro); }
+.pago--aprobado { color: #1b5e20; background: #e8f5e9; }
 .girando { animation: girar 1s linear infinite; }
 @keyframes girar { to { transform: rotate(360deg); } }
 </style>

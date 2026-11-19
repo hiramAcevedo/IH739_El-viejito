@@ -7,6 +7,18 @@
         <p class="regreso__texto">Le preguntamos al sistema en qué estado quedó tu pedido.</p>
       </template>
 
+      <template v-else-if="estado === 'confirmando' && agotado">
+        <EstadoPago estado="aprobado" forma="larga" />
+        <h1>Tu pago fue aprobado</h1>
+        <p class="regreso__folio-etiqueta">Folio</p>
+        <p class="regreso__folio">#{{ datos.folio }}</p>
+        <p class="regreso__texto">La confirmación está tardando. Te llegará un correo y puedes seguir tu pedido con tu
+          folio en Rastrear pedido.</p>
+        <ResumenPedido :cotizacion="datos" titulo="" compacto />
+        <BotonPrimario bloque @click="empezar">Volver a revisar</BotonPrimario>
+        <RouterLink to="/seguimiento" class="regreso__liga">Rastrear pedido</RouterLink>
+      </template>
+
       <template v-else-if="estado === 'confirmando'">
         <EstadoPago estado="confirmando" forma="larga" />
         <h1>Confirmando tu pago</h1>
@@ -76,7 +88,7 @@ import { useCarritoStore } from '@/stores/carritoStore'
 import BotonPrimario from '@/components/compartidos/BotonPrimario.vue'
 import ResumenPedido from '@/components/compartidos/ResumenPedido.vue'
 import EstadoPago from '@/components/compartidos/EstadoPago.vue'
-import { estadoDe } from '@/lib/regreso.js'
+import { estadoDe, siguientePausa } from '@/lib/regreso.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -88,15 +100,29 @@ const estado = ref('')
 
 const PANTALLA = { confirmado: 'pago-confirmado', confirmando: 'pago-confirmado', pendiente: 'pago-pendiente', error: 'pago-error' }
 
-// mientras el aviso no llega, la pantalla vuelve a preguntar cada 2 segundos, hasta un minuto
-let intentos = 0
+// mientras el aviso no llega, la pantalla vuelve a preguntar al ritmo de ESPERA_DEL_AVISO (lib/regreso.js); al agotarse
+// se detiene, lo dice y ofrece volver a revisar
+const agotado = ref(false)
+let esperado = 0
 let espera = null
 function seguirPreguntando() {
   clearTimeout(espera)
-  if (estado.value === 'confirmando' && intentos < 30) {
-    intentos += 1
-    espera = setTimeout(revisar, 2000)
+  if (estado.value !== 'confirmando') return
+  const pausa = siguientePausa(esperado)
+  if (pausa === null) {
+    agotado.value = true
+    return
   }
+  esperado += pausa
+  espera = setTimeout(revisar, pausa)
+}
+
+/** Una ronda completa de consultas, desde ya: al abrir la pantalla, con otra sesión o con «Volver a revisar». */
+function empezar() {
+  clearTimeout(espera)
+  esperado = 0
+  agotado.value = false
+  revisar()
 }
 
 async function revisar() {
@@ -128,7 +154,7 @@ async function revisar() {
   }
 }
 
-watch(() => route.query.session_id, revisar, { immediate: true })
+watch(() => route.query.session_id, empezar, { immediate: true })
 onBeforeUnmount(() => clearTimeout(espera))
 
 /**

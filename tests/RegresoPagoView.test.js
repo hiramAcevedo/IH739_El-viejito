@@ -4,6 +4,7 @@ import { createRouter, createMemoryHistory } from 'vue-router'
 import { createPinia, setActivePinia } from 'pinia'
 import RegresoPagoView from '@/views/RegresoPagoView.vue'
 import { useCarritoStore } from '@/stores/carritoStore'
+import { ESPERA_DEL_AVISO, siguientePausa } from '@/lib/regreso.js'
 
 const api = vi.hoisted(() => ({ consultarRegreso: vi.fn(), abrirSesionPago: vi.fn() }))
 vi.mock('@/lib/api', () => api)
@@ -151,19 +152,81 @@ describe('RegresoPagoView: pantallas de regreso de la pasarela', () => {
     expect(vi.getTimerCount()).toBe(0)
   })
 
-  it('si el aviso nunca llega se detiene tras 30 reintentos: 31 consultas, la última a los 60 s, y ninguna más', async () => {
+  it('si el aviso no llega pregunta cada 2 s el primer medio minuto y luego cada 10 s; a los 2 minutos se detiene y lo dice', async () => {
     api.consultarRegreso.mockResolvedValue(CONFIRMANDO)
 
     const { wrapper } = await montar('/pago/confirmado?session_id=cs_test_1')
-    await vi.advanceTimersByTimeAsync(59999)
-    expect(api.consultarRegreso).toHaveBeenCalledTimes(30)
+    await vi.advanceTimersByTimeAsync(29999)
+    expect(api.consultarRegreso).toHaveBeenCalledTimes(15) // al llegar y a los 2, 4… 28 s
     await vi.advanceTimersByTimeAsync(1)
-    expect(api.consultarRegreso).toHaveBeenCalledTimes(31)
-
-    await vi.advanceTimersByTimeAsync(120000)
-    expect(api.consultarRegreso).toHaveBeenCalledTimes(31)
-    expect(vi.getTimerCount()).toBe(0)
+    expect(api.consultarRegreso).toHaveBeenCalledTimes(16) // a los 30 s
+    await vi.advanceTimersByTimeAsync(9999)
+    expect(api.consultarRegreso).toHaveBeenCalledTimes(16)
+    await vi.advanceTimersByTimeAsync(1)
+    expect(api.consultarRegreso).toHaveBeenCalledTimes(17) // a los 40 s
     expect(titulo(wrapper)).toBe('Confirmando tu pago')
+
+    await vi.advanceTimersByTimeAsync(80000)
+    await flushPromises()
+    expect(api.consultarRegreso).toHaveBeenCalledTimes(25) // la última, a los 120 s
+    expect(titulo(wrapper)).toBe('Tu pago fue aprobado')
+    expect(wrapper.get('.pago').text()).toBe('Pago aprobado')
+    expect(wrapper.get('.regreso__folio').text()).toBe('#C41D9A7E')
+    expect(wrapper.text()).toContain('La confirmación está tardando. Te llegará un correo')
+    expect(wrapper.text()).not.toContain('Esta pantalla se actualiza sola.')
+    expect(wrapper.get('a.regreso__liga').attributes('href')).toBe('/seguimiento')
+    expect(vi.getTimerCount()).toBe(0)
+
+    await vi.advanceTimersByTimeAsync(600000)
+    expect(api.consultarRegreso).toHaveBeenCalledTimes(25)
+  })
+
+  it('«Volver a revisar» empieza otra ronda de consultas desde ya; si el aviso llegó, confirma el pago', async () => {
+    api.consultarRegreso.mockResolvedValue(CONFIRMANDO)
+    const { wrapper } = await montar('/pago/confirmado?session_id=cs_test_1')
+    await vi.advanceTimersByTimeAsync(120000)
+    await flushPromises()
+    expect(titulo(wrapper)).toBe('Tu pago fue aprobado')
+    const volver = () => wrapper.findAll('button').find((b) => b.text() === 'Volver a revisar')
+
+    await volver().trigger('click')
+    await flushPromises()
+    expect(api.consultarRegreso).toHaveBeenCalledTimes(26)
+    expect(titulo(wrapper)).toBe('Confirmando tu pago')
+    await vi.advanceTimersByTimeAsync(2000)
+    expect(api.consultarRegreso).toHaveBeenCalledTimes(27)
+
+    api.consultarRegreso.mockResolvedValue(PAGADO)
+    await vi.advanceTimersByTimeAsync(2000)
+    await flushPromises()
+    expect(titulo(wrapper)).toBe('Gracias por tu compra')
+    await vi.advanceTimersByTimeAsync(60000)
+    expect(api.consultarRegreso).toHaveBeenCalledTimes(28)
+  })
+
+  it('una red caída durante la espera larga no corta el ciclo: sigue al mismo ritmo y a los 2 minutos muestra el aviso', async () => {
+    api.consultarRegreso
+      .mockResolvedValueOnce(CONFIRMANDO) // al llegar
+      .mockRejectedValue(new TypeError('Failed to fetch')) // después, la red no responde
+
+    const { wrapper } = await montar('/pago/confirmado?session_id=cs_test_1')
+    await vi.advanceTimersByTimeAsync(40000)
+    expect(api.consultarRegreso).toHaveBeenCalledTimes(17)
+    expect(titulo(wrapper)).toBe('Confirmando tu pago')
+
+    await vi.advanceTimersByTimeAsync(80000)
+    await flushPromises()
+    expect(api.consultarRegreso).toHaveBeenCalledTimes(25)
+    expect(titulo(wrapper)).toBe('Tu pago fue aprobado')
+    expect(wrapper.text()).not.toContain('No encontramos ese pago')
+  })
+
+  it('el ritmo de la espera: 15 pausas de 2 s, 9 de 10 s y ninguna más después de 2 minutos', () => {
+    const pausas = []
+    for (let esperado = 0, pausa; (pausa = siguientePausa(esperado)) !== null; esperado += pausa) pausas.push(pausa)
+    expect(pausas).toEqual([...Array(15).fill(2000), ...Array(9).fill(10000)])
+    expect(pausas.reduce((a, b) => a + b)).toBe(ESPERA_DEL_AVISO.hasta)
+    expect(siguientePausa(0, { cada: 1, luegoCada: 5, desde: 2, hasta: 3 })).toBe(1)
   })
 
   it('sesión abierta sin pagar: «Completa tu pago» con la fecha límite y la liga de pago; la ruta pasa a /pago/pendiente y no vuelve a preguntar', async () => {
