@@ -33,17 +33,17 @@
           <button class="admin-card" @click="activeTab = 'productos'">
             <div class="card-icon-wrap"><Package :size="32" color="#8a6d1f" /></div>
             <h3>Productos</h3>
-            <p>{{ statsProductos }} registrados</p>
+            <p>{{ cuenta(statsProductos, 'registrado', 'registrados') }}</p>
           </button>
           <button class="admin-card" @click="activeTab = 'pedidos'">
             <div class="card-icon-wrap"><ClipboardList :size="32" color="#8a6d1f" /></div>
             <h3>Pedidos</h3>
-            <p>{{ resumen ? `${resumen.pedidos} registrados · ${resumen.por_cobrar} por cobrar` : '…' }}</p>
+            <p>{{ resumen ? `${cuenta(resumen.pedidos, 'registrado', 'registrados')} · ${resumen.por_cobrar} por cobrar` : '…' }}</p>
           </button>
           <button class="admin-card" @click="activeTab = 'envios'">
             <div class="card-icon-wrap"><Truck :size="32" color="#8a6d1f" /></div>
             <h3>Envíos</h3>
-            <p>{{ resumen ? `${resumen.envios_por_capturar} guía por capturar` : '…' }}</p>
+            <p>{{ resumen ? cuenta(resumen.envios_por_capturar, 'guía por capturar', 'guías por capturar') : '…' }}</p>
           </button>
           <button class="admin-card" @click="activeTab = 'legal'">
             <div class="card-icon-wrap"><FileText :size="32" color="#8a6d1f" /></div>
@@ -53,7 +53,7 @@
           <button v-if="authStore.esSuperadmin" class="admin-card" @click="activeTab = 'usuarios'">
             <div class="card-icon-wrap"><Users :size="32" color="#8a6d1f" /></div>
             <h3>Usuarios</h3>
-            <p>{{ resumen ? `${resumen.usuarios} administradores` : '…' }}</p>
+            <p>{{ resumen ? cuenta(resumen.usuarios, 'administrador', 'administradores') : '…' }}</p>
           </button>
         </div>
       </section>
@@ -225,6 +225,7 @@ import {
   deleteProducto as deleteProductoDB
 } from '@/lib/supabaseClient'
 import { resumenPanel } from '@/lib/api'
+import { cuenta } from '@/lib/formato'
 import PanelPedidos from '@/components/panel/PanelPedidos.vue'
 import PanelEnvios from '@/components/panel/PanelEnvios.vue'
 import PanelPagos from '@/components/panel/PanelPagos.vue'

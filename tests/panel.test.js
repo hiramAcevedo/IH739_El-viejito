@@ -97,8 +97,19 @@ describe('AdminView: dashboard y productos', () => {
     expect(texto).toContain('Bienvenido, Ana Pérez · superadministrador')
     expect(texto).toContain('3 registrados')
     expect(texto).toContain('12 registrados · 3 por cobrar')
-    expect(texto).toContain('2 guía por capturar')
+    expect(texto).toContain('2 guías por capturar')
     expect(texto).toContain('4 administradores')
+  })
+
+  it('con una sola de cada cosa, las cifras del tablero van en singular', async () => {
+    db.getProductosAdmin.mockResolvedValue(PRODUCTOS.slice(0, 1))
+    api.resumenPanel.mockResolvedValue({ pedidos: 1, por_cobrar: 1, envios_por_capturar: 1, usuarios: 1 })
+    const { wrapper } = await montarAdmin()
+
+    expect(wrapper.findAll('.admin-card p').map((p) => p.text())).toEqual([
+      '1 registrado', '1 registrado · 1 por cobrar', '1 guía por capturar', 'Aviso de privacidad, términos y leyenda',
+      '1 administrador'
+    ])
   })
 
   it('un administrador no ve Usuarios; sin nombre saluda con el correo y sin resumen las cuentas esperan', async () => {
