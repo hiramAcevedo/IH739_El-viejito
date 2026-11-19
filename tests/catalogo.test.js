@@ -30,7 +30,15 @@ beforeEach(() => {
   vi.spyOn(console, 'error').mockImplementation(() => {})
 })
 
-async function montar(componente, ruta = '/') {
+// productos pide el catálogo después del primer pintado: se espera un cuadro y luego las respuestas
+async function esperarCarga() {
+  // con temporizadores falsos (detalle y carrito, que no difieren nada) basta con el cuadro
+  await new Promise((listo) => requestAnimationFrame(() => (vi.isFakeTimers() ? listo() : setTimeout(listo, 0))))
+  await vi.dynamicImportSettled()
+  await flushPromises()
+}
+
+async function montar(componente, ruta = '/', { esperar = true } = {}) {
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [
@@ -43,8 +51,7 @@ async function montar(componente, ruta = '/') {
   await router.push(ruta)
   await router.isReady()
   const wrapper = mount(componente, { global: { plugins: [router] } })
-  await vi.dynamicImportSettled()
-  await flushPromises()
+  if (esperar) await esperarCarga()
   return { wrapper, router }
 }
 
@@ -81,6 +88,15 @@ describe('productosStore', () => {
 
 describe('ProductosView', () => {
   const nombres = (wrapper) => wrapper.findAll('.product-name').map((n) => n.text())
+
+  it('antes del primer pintado no pide el catálogo y ya dice que carga, no que está vacío', async () => {
+    api.listarProductos.mockResolvedValue(PRODUCTOS)
+    const { wrapper } = await montar(ProductosView, '/productos', { esperar: false })
+    expect(wrapper.text()).toContain('Cargando productos...')
+    expect(api.listarProductos).not.toHaveBeenCalled()
+    await esperarCarga()
+    expect(api.listarProductos).toHaveBeenCalledTimes(1)
+  })
 
   it('mientras carga lo dice; luego muestra cada producto con su tipo y su precio', async () => {
     let entregar

@@ -120,6 +120,7 @@ import { ShoppingCart } from 'lucide-vue-next'
 import { resolveProductImage } from '@/lib/imageHelper'
 import { useCarritoStore } from '@/stores/carritoStore'
 import { useProductosStore } from '@/stores/productosStore'
+import { despuesDelPintado } from '@/lib/pintado'
 
 const carrito = useCarritoStore()
 const productosStore = useProductosStore()
@@ -132,7 +133,8 @@ function agregarDesdeGrid(e, producto) {
 
 // Acceso reactivo al store
 const productos = computed(() => productosStore.productos)
-const loading = computed(() => productosStore.loading)
+// hasta la primera respuesta se ve «Cargando», no un catálogo vacío
+const loading = computed(() => productosStore.loading || (!productosStore.loaded && !productosStore.error))
 const error = computed(() => productosStore.error)
 
 // Filtros
@@ -195,7 +197,9 @@ const fetchProductos = async () => {
   }
 }
 
-onMounted(() => {
+// el catálogo se pide después del primer pintado: las fotos de los productos no compiten con la del hero
+onMounted(async () => {
+  await despuesDelPintado()
   fetchProductos()
 })
 </script>
