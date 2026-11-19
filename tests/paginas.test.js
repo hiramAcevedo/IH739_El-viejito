@@ -25,10 +25,11 @@ const api = vi.hoisted(() => ({
   leerTextoLegal: vi.fn(),
   leerInvitacion: vi.fn(),
   aceptarInvitacion: vi.fn(),
-  consultarSeguimientoFirmado: vi.fn()
+  consultarSeguimientoFirmado: vi.fn(),
+  listarProductos: vi.fn()
 }))
 vi.mock('@/lib/api', () => api)
-const db = vi.hoisted(() => ({ getProductos: vi.fn(), supabase: { auth: { signOut: vi.fn() } } }))
+const db = vi.hoisted(() => ({ supabase: { auth: { signOut: vi.fn() } } }))
 vi.mock('@/lib/supabaseClient', () => db)
 
 // Swiper toca el DOM real; aquí basta con saber con qué opciones se arma
@@ -157,7 +158,7 @@ describe('HomeView', () => {
   ]
 
   it('el carrusel muestra los productos con su precio y su liga, y se arma con Swiper', async () => {
-    db.getProductos.mockResolvedValue(PRODUCTOS)
+    api.listarProductos.mockResolvedValue(PRODUCTOS)
     const { wrapper } = await montar(HomeView)
 
     expect(wrapper.text()).toContain('$320.00')
@@ -169,20 +170,20 @@ describe('HomeView', () => {
   })
 
   it('sin productos no arma el carrusel; con pocos, no da la vuelta', async () => {
-    db.getProductos.mockResolvedValue([])
+    api.listarProductos.mockResolvedValue([])
     const vacio = await montar(HomeView)
     expect(swiper.instancias).toHaveLength(0)
     vacio.wrapper.unmount()
 
     setActivePinia(createPinia())
-    db.getProductos.mockResolvedValue(PRODUCTOS.slice(0, 2))
+    api.listarProductos.mockResolvedValue(PRODUCTOS.slice(0, 2))
     await montar(HomeView)
     expect(swiper.instancias[0].opciones.loop).toBe(false)
     expect(swiper.instancias[0].opciones.breakpoints[1024].slidesPerView).toBe(2)
   })
 
   it('si se sale de la página antes de que llegue Swiper, el carrusel ya no se arma', async () => {
-    db.getProductos.mockResolvedValue(PRODUCTOS)
+    api.listarProductos.mockResolvedValue(PRODUCTOS)
     const router = createRouter({ history: createMemoryHistory(), routes: RUTAS })
     await router.push('/')
     await router.isReady()
@@ -192,7 +193,7 @@ describe('HomeView', () => {
   })
 
   it('el título se pinta primero: la foto del hero, la de historia y el carrusel llegan después', async () => {
-    db.getProductos.mockResolvedValue(PRODUCTOS)
+    api.listarProductos.mockResolvedValue(PRODUCTOS)
     const router = createRouter({ history: createMemoryHistory(), routes: RUTAS })
     await router.push('/')
     await router.isReady()
@@ -201,7 +202,7 @@ describe('HomeView', () => {
     expect(wrapper.find('.hero__title').exists()).toBe(true)
     expect(wrapper.find('.hero').classes()).not.toContain('hero--foto')
     expect(wrapper.find('.welcome__real-img').attributes('src')).toBeUndefined()
-    expect(db.getProductos).not.toHaveBeenCalled()
+    expect(api.listarProductos).not.toHaveBeenCalled()
 
     await esperarCarga()
     expect(wrapper.find('.hero').classes()).toContain('hero--foto')
@@ -210,7 +211,7 @@ describe('HomeView', () => {
   })
 
   it('al salir de la página, el carrusel se destruye', async () => {
-    db.getProductos.mockResolvedValue(PRODUCTOS)
+    api.listarProductos.mockResolvedValue(PRODUCTOS)
     const { wrapper } = await montar(HomeView)
     wrapper.unmount()
     expect(swiper.instancias[0].destroy).toHaveBeenCalledWith(true, true)

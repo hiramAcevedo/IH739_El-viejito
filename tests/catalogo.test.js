@@ -1,6 +1,6 @@
 /**
  * El catálogo y el carrito: el store de productos con su caché, la vista de productos con sus filtros, el detalle de
- * un producto y el carrito con la cotización de la API. Supabase y la API van simulados.
+ * un producto y el carrito con la cotización. El catálogo y la cotización salen de la API, que va simulada.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, flushPromises, enableAutoUnmount } from '@vue/test-utils'
@@ -12,9 +12,7 @@ import ProductosView from '@/views/ProductosView.vue'
 import ProductoDetalleView from '@/views/ProductoDetalleView.vue'
 import CarritoView from '@/views/CarritoView.vue'
 
-const db = vi.hoisted(() => ({ getProductos: vi.fn() }))
-vi.mock('@/lib/supabaseClient', () => db)
-const api = vi.hoisted(() => ({ calcularPedido: vi.fn() }))
+const api = vi.hoisted(() => ({ calcularPedido: vi.fn(), listarProductos: vi.fn() }))
 vi.mock('@/lib/api', () => api)
 
 enableAutoUnmount(afterEach)
@@ -52,28 +50,28 @@ async function montar(componente, ruta = '/') {
 
 describe('productosStore', () => {
   it('pide los productos una sola vez y los sirve de la caché; con force los vuelve a pedir', async () => {
-    db.getProductos.mockResolvedValue(PRODUCTOS)
+    api.listarProductos.mockResolvedValue(PRODUCTOS)
     const store = useProductosStore()
 
     expect(await store.fetchProductos()).toEqual(PRODUCTOS)
     expect(await store.fetchProductos()).toEqual(PRODUCTOS)
-    expect(db.getProductos).toHaveBeenCalledTimes(1)
+    expect(api.listarProductos).toHaveBeenCalledTimes(1)
     await store.fetchProductos(true)
-    expect(db.getProductos).toHaveBeenCalledTimes(2)
+    expect(api.listarProductos).toHaveBeenCalledTimes(2)
     expect([store.loaded, store.loading, store.error]).toEqual([true, false, false])
   })
 
   it('getById carga la lista si hace falta y regresa null si el producto no existe', async () => {
-    db.getProductos.mockResolvedValue(PRODUCTOS)
+    api.listarProductos.mockResolvedValue(PRODUCTOS)
     const store = useProductosStore()
 
     expect((await store.getById('p-reposado')).nombre).toBe('Reposado Suave')
     expect(await store.getById('no-existe')).toBeNull()
-    expect(db.getProductos).toHaveBeenCalledTimes(1)
+    expect(api.listarProductos).toHaveBeenCalledTimes(1)
   })
 
-  it('si Supabase falla, marca el error y lo deja pasar', async () => {
-    db.getProductos.mockRejectedValue(new Error('sin red'))
+  it('si la API falla, marca el error y lo deja pasar', async () => {
+    api.listarProductos.mockRejectedValue(new Error('sin red'))
     const store = useProductosStore()
 
     await expect(store.fetchProductos()).rejects.toThrow('sin red')
@@ -86,7 +84,7 @@ describe('ProductosView', () => {
 
   it('mientras carga lo dice; luego muestra cada producto con su tipo y su precio', async () => {
     let entregar
-    db.getProductos.mockReturnValue(new Promise((resolve) => (entregar = resolve)))
+    api.listarProductos.mockReturnValue(new Promise((resolve) => (entregar = resolve)))
     const { wrapper } = await montar(ProductosView, '/productos')
     expect(wrapper.text()).toContain('Cargando productos...')
 
@@ -99,7 +97,7 @@ describe('ProductosView', () => {
   })
 
   it('filtra por tipo y por precio, cuenta los resultados y limpia los filtros', async () => {
-    db.getProductos.mockResolvedValue(PRODUCTOS)
+    api.listarProductos.mockResolvedValue(PRODUCTOS)
     const { wrapper } = await montar(ProductosView, '/productos')
 
     await wrapper.find('.filtro-reposado').trigger('click')
@@ -117,7 +115,7 @@ describe('ProductosView', () => {
   })
 
   it('Agregar suma el producto al carrito sin abrir su detalle', async () => {
-    db.getProductos.mockResolvedValue(PRODUCTOS)
+    api.listarProductos.mockResolvedValue(PRODUCTOS)
     const { wrapper, router } = await montar(ProductosView, '/productos')
 
     await wrapper.findAll('.btn-agregar-grid')[1].trigger('click')
@@ -127,7 +125,7 @@ describe('ProductosView', () => {
   })
 
   it('si la carga falla ofrece reintentar, y el reintento muestra los productos', async () => {
-    db.getProductos.mockRejectedValueOnce(new Error('sin red')).mockResolvedValueOnce(PRODUCTOS)
+    api.listarProductos.mockRejectedValueOnce(new Error('sin red')).mockResolvedValueOnce(PRODUCTOS)
     const { wrapper } = await montar(ProductosView, '/productos')
     expect(wrapper.text()).toContain('No se pudieron cargar los productos.')
 
@@ -137,7 +135,7 @@ describe('ProductosView', () => {
   })
 
   it('sin productos, el rango de precio usa sus valores por omisión', async () => {
-    db.getProductos.mockResolvedValue([])
+    api.listarProductos.mockResolvedValue([])
     const { wrapper } = await montar(ProductosView, '/productos')
     const rango = wrapper.find('#filtro-precio')
     expect([rango.attributes('min'), rango.attributes('max')]).toEqual(['0', '1000'])
@@ -148,7 +146,7 @@ describe('ProductoDetalleView', () => {
   it('muestra el producto de la ruta y lo agrega al carrito, con el botón en pausa un momento', async () => {
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
     try {
-      db.getProductos.mockResolvedValue(PRODUCTOS)
+      api.listarProductos.mockResolvedValue(PRODUCTOS)
       const { wrapper } = await montar(ProductoDetalleView, '/productos/p-especial')
 
       expect(wrapper.find('.producto-nombre').text()).toBe('Edición Especial')
@@ -168,13 +166,13 @@ describe('ProductoDetalleView', () => {
     }
   })
 
-  it('un producto que no existe o una falla de Supabase muestran el aviso con la liga al catálogo', async () => {
-    db.getProductos.mockResolvedValue(PRODUCTOS)
+  it('un producto que no existe o una falla de la API muestran el aviso con la liga al catálogo', async () => {
+    api.listarProductos.mockResolvedValue(PRODUCTOS)
     const noExiste = await montar(ProductoDetalleView, '/productos/no-existe')
     expect(noExiste.wrapper.find('.btn-back').attributes('href')).toBe('/productos')
 
     setActivePinia(createPinia())
-    db.getProductos.mockRejectedValue(new Error('sin red'))
+    api.listarProductos.mockRejectedValue(new Error('sin red'))
     const caido = await montar(ProductoDetalleView, '/productos/p-blanco')
     expect(caido.wrapper.find('.btn-back').exists()).toBe(true)
     expect(console.error).toHaveBeenCalledWith('Error al cargar producto:', expect.any(Error))

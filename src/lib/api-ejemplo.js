@@ -175,6 +175,14 @@ export async function responder(metodo, ruta, cuerpo = {}, token) {
   const partes = camino.split('/').filter(Boolean)
   const es = (m, patron) => m === metodo && new RegExp(`^${patron}$`).test(camino)
 
+  // el catálogo de ejemplo es el real, leído de Supabase como lo leía el sitio antes de pasar a la API
+  if (es('GET', '/productos/')) {
+    const { supabase } = await import('./supabaseClient')
+    const { data, error } = await supabase.from('productos').select('*').eq('activo', true).order('precio')
+    if (error) throw new ErrorApi(502, { detail: error.message })
+    return data
+  }
+
   if (es('POST', '/pedidos/calcular/')) return cotizar(cuerpo.items, cuerpo.metodo_entrega)
 
   if (es('POST', '/pedidos/crear/')) {

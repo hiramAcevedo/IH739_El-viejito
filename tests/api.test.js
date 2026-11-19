@@ -145,6 +145,7 @@ describe('api.js (fetch simulado)', () => {
 describe('api.js: la ruta, el método y el token de cada operación', () => {
   const T = 'token-de-prueba'
   it.each([
+    ['listarProductos', [], 'GET', '/productos/', undefined, undefined],
     ['crearPedido', [{ items: [] }], 'POST', '/pedidos/crear/', { items: [] }, undefined],
     ['abrirSesionPago', ['ped-1'], 'POST', '/pagos/sesion/', { pedido_id: 'ped-1' }, undefined],
     ['consultarSeguimiento', [{ correo: 'a@b.mx', folio: 'ABC12345' }], 'POST', '/pedidos/seguimiento/', { correo: 'a@b.mx', folio: 'ABC12345' }, undefined],

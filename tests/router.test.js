@@ -17,7 +17,6 @@ const supabase = vi.hoisted(() => {
 })
 vi.mock('@/lib/supabaseClient', () => ({
   supabase: supabase.cliente,
-  getProductos: vi.fn(async () => []),
   getProductosAdmin: vi.fn(async () => []),
   createProducto: vi.fn(),
   updateProducto: vi.fn(),

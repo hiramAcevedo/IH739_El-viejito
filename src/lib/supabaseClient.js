@@ -13,19 +13,8 @@ if (!supabaseUrl || !supabaseAnonKey) {
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // ──────────────────────────────────────────────
-// Helpers de ejemplo para las tablas del Sprint 1
+// Los productos del panel (el catálogo público sale de la API)
 // ──────────────────────────────────────────────
-
-/** Obtiene todos los productos activos (vista publica) */
-export async function getProductos() {
-  const { data, error } = await supabase
-    .from('productos')
-    .select('*')
-    .eq('activo', true)
-    .order('nombre')
-  if (error) throw error
-  return data
-}
 
 /** Obtiene TODOS los productos (activos e inactivos, para admin) */
 export async function getProductosAdmin() {

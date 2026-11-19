@@ -27,13 +27,6 @@ describe('supabaseClient.js', () => {
     expect(sb.createClient).toHaveBeenCalledWith('https://supabase.prueba.local', 'llave-de-prueba')
   })
 
-  it('getProductos trae sólo los activos, por nombre', async () => {
-    const { getProductos } = await import('@/lib/supabaseClient')
-    responde([{ id: 'p-1' }])
-    expect(await getProductos()).toEqual([{ id: 'p-1' }])
-    expect(sb.consulta.eq).toHaveBeenCalledWith('activo', true)
-    expect(sb.consulta.order).toHaveBeenCalledWith('nombre')
-  })
 
   it('el panel lee, crea, cambia y borra productos', async () => {
     const { getProductosAdmin, createProducto, updateProducto, deleteProducto } = await import('@/lib/supabaseClient')
@@ -59,7 +52,7 @@ describe('supabaseClient.js', () => {
     const error = { message: 'new row violates row-level security policy', code: '42501' }
     responde(null, error)
     for (const llamada of [
-      () => helpers.getProductos(), () => helpers.getProductosAdmin(), () => helpers.createProducto({}),
+      () => helpers.getProductosAdmin(), () => helpers.createProducto({}),
       () => helpers.updateProducto('p-1', {}), () => helpers.deleteProducto('p-1')
     ]) {
       await expect(llamada()).rejects.toBe(error)

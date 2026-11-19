@@ -56,6 +56,9 @@ async function pedir(metodo, ruta, { cuerpo, token } = {}) {
  */
 export const calcularPedido = (carrito) => pedir('POST', '/pedidos/calcular/', { cuerpo: carrito })
 
+/** GET /productos/ · el catálogo: los productos activos con precio, descripción e imagen, del más barato al más caro. */
+export const listarProductos = () => pedir('GET', '/productos/')
+
 /**
  * POST /pedidos/crear/ · registra el pedido como pendiente con el importe calculado en el servidor.
  * @param {{items, metodo_entrega, cliente_nombre, cliente_email, telefono, notas,
