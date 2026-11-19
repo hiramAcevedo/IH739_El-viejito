@@ -1,5 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
+// las puertas de entrada directas (inicio, el catálogo y el rastreo) van con el JavaScript principal: al abrirlas no
+// hace falta otra vuelta al servidor por su vista; las demás se cargan cuando se visitan
+import ProductosView from '@/views/ProductosView.vue'
+import SeguimientoView from '@/views/SeguimientoView.vue'
 import { useAuthStore } from '@/stores/authStore'
 
 const routes = [
@@ -19,7 +23,7 @@ const routes = [
   {
     path: '/productos',
     name: 'productos',
-    component: () => import('@/views/ProductosView.vue'),
+    component: ProductosView,
     meta: { title: 'Productos | Tequila El Viejito' }
   },
   {
@@ -70,7 +74,7 @@ const routes = [
     // Seguimiento sin cuenta: correo y folio, o la liga firmada del correo de confirmación
     path: '/seguimiento',
     name: 'seguimiento',
-    component: () => import('@/views/SeguimientoView.vue'),
+    component: SeguimientoView,
     meta: { title: 'Rastrear pedido | Tequila El Viejito' }
   },
   {
