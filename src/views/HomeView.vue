@@ -1,7 +1,7 @@
 <template>
   <main>
     <!-- ── Hero ── -->
-    <section class="hero">
+    <section :class="['hero', { 'hero--foto': pintado }]">
       <div class="hero__overlay"></div>
       <div class="hero__content">
         <p class="hero__eyebrow">Desde 1937</p>
@@ -68,14 +68,14 @@
         <RouterLink to="/nosotros" class="btn-secondary">Conoce nuestra historia</RouterLink>
       </div>
       <div class="welcome__img">
-        <img :src="imgHistoria" alt="Destilería El Viejito" class="welcome__real-img" loading="lazy" decoding="async" width="1200" height="509" />
+        <img :src="pintado ? imgHistoria : undefined" alt="Destilería El Viejito" class="welcome__real-img" loading="lazy" decoding="async" width="1200" height="509" />
       </div>
     </section>
   </main>
 </template>
 
 <script setup>
-  import { onMounted, onBeforeUnmount, nextTick } from 'vue'
+  import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
   import { RouterLink } from 'vue-router'
   import 'swiper/css'
   import 'swiper/css/navigation'
@@ -84,6 +84,7 @@
   import imgHistoria from '@/assets/historia.webp'
   import { resolveProductImage } from '@/lib/imageHelper'
   import { useProductosStore } from '@/stores/productosStore'
+  import { despuesDelPintado } from '@/lib/pintado'
 
   const productosStore = useProductosStore()
 
@@ -121,7 +122,12 @@
     })
   }
 
+  // el título del hero se pinta primero; la foto de fondo, la de historia y el carrusel se piden después
+  const pintado = ref(false)
+
   onMounted(async () => {
+    await despuesDelPintado()
+    pintado.value = true
     await productosStore.fetchProductos()
     await nextTick()
     if (productosStore.productos.length) {
@@ -154,13 +160,18 @@
   .hero__overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('@/assets/hero-nosotros.webp') center/cover no-repeat;
+    background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)) center/cover no-repeat;
     opacity: 0.8;
+  }
+
+  /* la foto llega después del primer pintado: el título no la espera */
+  .hero--foto .hero__overlay {
+    background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('@/assets/hero-nosotros.webp');
   }
 
   /* en teléfonos, la foto del hero en 828 px: la de 1600 px es para pantallas anchas */
   @media (max-width: 828px) {
-    .hero__overlay {
+    .hero--foto .hero__overlay {
       background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('@/assets/hero-nosotros-movil.webp');
     }
   }

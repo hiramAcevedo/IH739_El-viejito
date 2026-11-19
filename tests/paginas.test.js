@@ -49,6 +49,8 @@ vi.mock('swiper/vue', async () => {
 })
 
 enableAutoUnmount(afterEach)
+// si una prueba con temporizadores falsos se corta, las siguientes no los heredan
+afterEach(() => vi.useRealTimers())
 
 const Vacia = { render: () => null }
 const RUTAS = [
@@ -73,13 +75,22 @@ beforeEach(() => {
   api.leerTextoLegal.mockResolvedValue({ titulo: 'Leyenda', contenido: 'Leyenda desde el panel.' })
 })
 
+// inicio pide la foto del hero, la de historia y el carrusel después del primer pintado, y Swiper y supabase-js llegan
+// con import(): se espera un cuadro y luego a que terminen esas cargas
+async function esperarCarga() {
+  await new Promise((listo) => requestAnimationFrame(() => setTimeout(listo, 0)))
+  for (let i = 0; i < 2; i++) {
+    await vi.dynamicImportSettled()
+    await flushPromises()
+  }
+}
+
 async function montar(componente, ruta = '/', opciones = {}) {
   const router = createRouter({ history: createMemoryHistory(), routes: RUTAS })
   await router.push(ruta)
   await router.isReady()
   const wrapper = mount(componente, { global: { plugins: [router] }, ...opciones })
-  await vi.dynamicImportSettled()
-  await flushPromises()
+  await esperarCarga()
   return { wrapper, router }
 }
 
@@ -176,9 +187,26 @@ describe('HomeView', () => {
     await router.push('/')
     await router.isReady()
     mount(HomeView, { global: { plugins: [router] } }).unmount()
-    await vi.dynamicImportSettled()
-    await flushPromises()
+    await esperarCarga()
     expect(swiper.instancias).toHaveLength(0)
+  })
+
+  it('el título se pinta primero: la foto del hero, la de historia y el carrusel llegan después', async () => {
+    db.getProductos.mockResolvedValue(PRODUCTOS)
+    const router = createRouter({ history: createMemoryHistory(), routes: RUTAS })
+    await router.push('/')
+    await router.isReady()
+    const wrapper = mount(HomeView, { global: { plugins: [router] } })
+
+    expect(wrapper.find('.hero__title').exists()).toBe(true)
+    expect(wrapper.find('.hero').classes()).not.toContain('hero--foto')
+    expect(wrapper.find('.welcome__real-img').attributes('src')).toBeUndefined()
+    expect(db.getProductos).not.toHaveBeenCalled()
+
+    await esperarCarga()
+    expect(wrapper.find('.hero').classes()).toContain('hero--foto')
+    expect(wrapper.find('.welcome__real-img').attributes('src')).toBeTruthy()
+    expect(swiper.instancias).toHaveLength(1)
   })
 
   it('al salir de la página, el carrusel se destruye', async () => {
@@ -200,9 +228,9 @@ describe('NosotrosView', () => {
 
 describe('ContactoView', () => {
   it('sin datos marca los tres campos; con datos válidos simula el envío y limpia el formulario', async () => {
+    const { wrapper } = await montar(ContactoView)
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
     try {
-      const { wrapper } = await montar(ContactoView)
       await wrapper.find('form').trigger('submit')
       await flushPromises()
       expect(wrapper.findAll('.error-msg').map((e) => e.text())).toEqual([
