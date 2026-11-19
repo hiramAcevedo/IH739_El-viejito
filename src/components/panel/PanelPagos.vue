@@ -79,8 +79,7 @@ async function abrir(pago) {
 onMounted(async () => {
   try {
     pagos.value = await listarPagos(await auth.token())
-    const conDuplicado = pagos.value.find((p) => p.folio === '3F9A1C27') || pagos.value[0]
-    if (conDuplicado) abrir(conDuplicado)
+    if (pagos.value.length) abrir(pagos.value[0])
   } catch (e) {
     error.value = e.message || 'No pudimos cargar los pagos.'
   } finally {
