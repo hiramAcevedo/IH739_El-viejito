@@ -177,6 +177,7 @@ describe('RegresoPagoView: pantallas de regreso de la pasarela', () => {
     expect(api.consultarRegreso).toHaveBeenCalledTimes(3)
     expect(titulo(wrapper)).toBe('Gracias por tu compra')
     expect(wrapper.get('.pago').text()).toBe('Pago confirmado')
+    expect(wrapper.get('.resumen').classes()).not.toContain('resumen--compacto')
     expect(carrito.items).toEqual([])
     expect(sessionStorage.getItem('pedido-en-curso')).toBeNull()
 
@@ -274,6 +275,8 @@ describe('RegresoPagoView: pantallas de regreso de la pasarela', () => {
 
       expect(titulo(wrapper)).toBe('El cobro no se completó')
       expect(wrapper.get('.pago').text()).toBe('No se pudo cobrar')
+      // el resumen compacto lleva sólo el total, sin la raya de arriba (CSS de .resumen--compacto)
+      expect(wrapper.get('.resumen').classes()).toContain('resumen--compacto')
       expect(wrapper.findAll('button').map((b) => b.text())).toContain('Intentar de nuevo')
       expect(router.currentRoute.value.name).toBe('pago-error')
       expect(carrito.items).toHaveLength(1)

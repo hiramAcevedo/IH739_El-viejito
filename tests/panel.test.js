@@ -412,6 +412,8 @@ describe('PanelPagos', () => {
     expect(filas[0].text()).toContain('Stripe')
     expect(filas[1].text()).toContain('otra')
     expect(filas[1].text()).toContain('Expirado')
+    // la referencia se recorta en pantalla; el valor completo queda en title
+    expect(filas[0].get('td.referencia').attributes('title')).toBe('cs_test_1')
     expect(wrapper.find('.eventos h3').text()).toBe('Avisos de la pasarela · #AAA11111')
     const avisos = wrapper.findAll('.eventos__lista li')
     expect(avisos[0].classes()).not.toContain('duplicado')
