@@ -116,6 +116,27 @@ describe('App, NavBar y AppFooter', () => {
     expect(wrapper.find('.aviso-ejemplo').text()).toBe('Datos de ejemplo')
   })
 
+  it('el botón de WhatsApp sale en las páginas del comprador y no en el panel ni en su inicio de sesión', async () => {
+    for (const [ruta, sale] of [['/productos', true], ['/login', false], ['/admin', false], ['/admin/registro', false]]) {
+      const { wrapper } = await montar(App, ruta)
+      expect(wrapper.find('a.whatsapp-float').exists(), ruta).toBe(sale)
+      wrapper.unmount()
+    }
+  })
+
+  it('la barra marca su enlace también en las rutas que cuelgan de él', async () => {
+    const activos = async (ruta) => {
+      const { wrapper } = await montar(NavBar, ruta)
+      const nombres = wrapper.findAll('.navbar__link--active').map((l) => l.text())
+      wrapper.unmount()
+      return nombres
+    }
+    expect(await activos('/seguimiento')).toEqual(['Rastrear pedido'])
+    expect(await activos('/seguimiento/ABC12345')).toEqual(['Rastrear pedido'])
+    expect(await activos('/productos/p-1')).toEqual(['Productos'])
+    expect(await activos('/')).toEqual(['Inicio'])
+  })
+
   it('si la API no da la leyenda, el pie conserva la que exige la venta a mayores', async () => {
     api.leerTextoLegal.mockRejectedValue(new Error('sin red'))
     const { wrapper } = await montar(AppFooter)
@@ -389,7 +410,9 @@ describe('SeguimientoDetalleView', () => {
     expect(wrapper.find('.detalle__titulo').text()).toBe('Pedido #ABC12345')
     expect(wrapper.find('.detalle__guia').text()).toBe('Guía EST123')
     expect(pasos(wrapper)).toEqual(['Pagado', 'Confirmado', 'Enviado', 'Entrega estimada'])
-    expect(wrapper.findAll('.linea__paso.hecho')).toHaveLength(2)
+    // el panel registró la guía desde pagado: Confirmado no queda hueco entre dos etapas hechas, y no lleva fecha
+    const hechos = wrapper.findAll('.linea__paso').map((p) => [p.classes().includes('hecho'), p.find('time').exists()])
+    expect(hechos).toEqual([[true, true], [true, false], [true, true], [false, true]])
   })
 
   it('el pedido que ya se buscó sale de la sesión del navegador, sin otra consulta', async () => {

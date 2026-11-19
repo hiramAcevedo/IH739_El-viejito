@@ -6,6 +6,7 @@
   <component :is="AvisoEjemplo" v-if="AvisoEjemplo" />
   
   <a
+    v-if="conWhatsapp"
     href="https://wa.me/5213312345678"
     class="whatsapp-float"
     target="_blank"
@@ -21,13 +22,17 @@
 <script setup>
   import NavBar from '@/components/NavBar.vue'
   import AppFooter from '@/components/AppFooter.vue'
-  import { defineAsyncComponent } from 'vue'
+  import { computed, defineAsyncComponent } from 'vue'
 
   // la marca de datos de ejemplo sólo existe en el servidor de desarrollo; el build de producción ni la importa
   const AvisoEjemplo = import.meta.env.DEV && import.meta.env.VITE_API_EJEMPLO === '1'
     ? defineAsyncComponent(() => import('@/components/compartidos/AvisoEjemplo.vue'))
     : null
-  import { RouterView } from 'vue-router'
+  import { RouterView, useRoute } from 'vue-router'
+
+  // el botón flotante de WhatsApp es para el comprador: en el panel y en su inicio de sesión tapaba las tarjetas
+  const route = useRoute()
+  const conWhatsapp = computed(() => route.path !== '/login' && !route.path.startsWith('/admin'))
 </script>
 
 <style>

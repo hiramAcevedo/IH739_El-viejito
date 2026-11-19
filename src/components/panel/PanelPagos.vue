@@ -20,7 +20,7 @@
               <td>{{ formatoFechaHora(p.creado) }}</td>
               <td class="mono">#{{ p.folio }}</td>
               <td>{{ p.proveedor === 'stripe' ? 'Stripe' : p.proveedor }}</td>
-              <td class="mono referencia">{{ p.referencia }}</td>
+              <td class="mono referencia" :title="p.referencia">{{ p.referencia }}</td>
               <td class="num">{{ formatoMoneda(p.importe) }}</td>
               <td><span :class="['intento', `intento-${p.estado}`]">{{ ESTADOS[p.estado] }}</span></td>
             </tr>
@@ -104,7 +104,12 @@ onMounted(async () => {
 .tabla tbody tr:focus-visible { outline: none; box-shadow: inset var(--enfoque); }
 .num { text-align: right; }
 .mono { font-family: var(--fuente-mono); }
-.referencia { font-size: 0.8rem; color: var(--color-texto-2); }
+/* la referencia de Stripe (cs_test_…, unos 66 caracteres) toma sólo el ancho que sobra y se recorta con puntos
+   suspensivos; el valor completo queda en title. Así las seis columnas caben con el aviso a un lado */
+.referencia {
+  font-size: 0.8rem; color: var(--color-texto-2);
+  width: 100%; max-width: 0; min-width: 6rem; overflow: hidden; text-overflow: ellipsis;
+}
 .intento { padding: 0.15rem 0.55rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700; }
 .intento-pagado { background: #e8f5e9; color: #1b5e20; }
 .intento-creado { background: #fff4d6; color: var(--color-aviso); }

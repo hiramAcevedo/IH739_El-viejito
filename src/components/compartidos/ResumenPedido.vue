@@ -1,5 +1,5 @@
 <template>
-  <section class="resumen" :aria-busy="calculando">
+  <section :class="['resumen', { 'resumen--compacto': compacto }]" :aria-busy="calculando">
     <h2 v-if="titulo" class="resumen__titulo">{{ titulo }}</h2>
 
     <p v-if="error" class="resumen__error" role="alert">{{ error }}</p>
@@ -78,6 +78,8 @@ const envio = computed(() => {
   border-top: 2px solid var(--color-texto); margin-top: var(--espacio-3); padding-top: var(--espacio-3);
   font-size: 1.1rem; color: var(--color-texto);
 }
+/* compacto: sólo el total, sin la raya ni el espacio que lo separan de las cuentas */
+.resumen--compacto .resumen__total { border-top: 0; margin-top: 0; padding-top: 0; }
 .resumen__calculando { color: var(--color-texto-2); font-weight: 600; }
 .resumen__nota { margin-top: var(--espacio-3); font-size: 0.85rem; color: var(--color-texto-2); }
 .resumen__error { color: var(--color-error); font-size: 0.95rem; }

@@ -50,14 +50,15 @@ const ETAPAS = [
   { estado: 'entregado', etiqueta: 'Entregado' }
 ]
 
+// Una etapa cuenta como hecha si ella o una posterior está en el historial: el panel puede registrar la guía (enviado)
+// desde pagado, sin pasar por confirmado. La fecha sólo se pone si la etapa misma está en el historial.
 const pasos = computed(() => {
   const historial = pedido.value?.historial || []
-  const lista = ETAPAS.map((e) => {
-    const hecho = historial.find((h) => h.estado === e.estado)
-    return { etiqueta: e.etiqueta, fecha: hecho?.fecha, hecho: Boolean(hecho) }
-  })
+  const registro = (estado) => historial.find((h) => h.estado === estado)
+  const ultima = ETAPAS.reduce((hasta, e, i) => (registro(e.estado) ? i : hasta), -1)
+  const lista = ETAPAS.map((e, i) => ({ etiqueta: e.etiqueta, fecha: registro(e.estado)?.fecha, hecho: i <= ultima }))
   const estimada = pedido.value?.envio_info?.fecha_estimada
-  if (estimada && !historial.some((h) => h.estado === 'entregado')) {
+  if (estimada && !registro('entregado')) {
     lista[3] = { etiqueta: 'Entrega estimada', fecha: `${estimada}T12:00:00-06:00`, hecho: false }
   }
   return lista

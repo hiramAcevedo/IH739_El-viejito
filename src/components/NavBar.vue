@@ -13,8 +13,7 @@
         <li v-for="link in navLinks" :key="link.name">
           <RouterLink
             :to="link.path"
-            class="navbar__link"
-            active-class="navbar__link--active"
+            :class="['navbar__link', { 'navbar__link--active': activo(link.path) }]"
             @click="closeMenu"
           >
             {{ link.label }}
@@ -50,7 +49,7 @@
 
 <script setup>
   import { ref, onMounted, onUnmounted } from 'vue'
-  import { RouterLink } from 'vue-router'
+  import { RouterLink, useRoute } from 'vue-router'
   import { ShoppingCart } from 'lucide-vue-next'
   import { useCarritoStore } from '@/stores/carritoStore'
 
@@ -65,6 +64,10 @@
     { name: 'contacto',  path: '/contacto',  label: 'Contacto'  },
     { name: 'seguimiento', path: '/seguimiento', label: 'Rastrear pedido' }
   ]
+
+  // activo en su ruta y en las que cuelgan de ella: «Rastrear pedido» en /seguimiento/:folio, «Productos» en /productos/:id
+  const route = useRoute()
+  const activo = (ruta) => route.path === ruta || (ruta !== '/' && route.path.startsWith(`${ruta}/`))
 
   function toggleMenu() {
     menuOpen.value = !menuOpen.value
