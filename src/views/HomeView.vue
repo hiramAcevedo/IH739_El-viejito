@@ -68,7 +68,7 @@
         <RouterLink to="/nosotros" class="btn-secondary">Conoce nuestra historia</RouterLink>
       </div>
       <div class="welcome__img">
-        <img :src="imgHistoria" alt="Destilería El Viejito" class="welcome__real-img" />
+        <img :src="imgHistoria" alt="Destilería El Viejito" class="welcome__real-img" loading="lazy" decoding="async" width="1200" height="509" />
       </div>
     </section>
   </main>
@@ -156,6 +156,13 @@
     inset: 0;
     background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('@/assets/hero-nosotros.webp') center/cover no-repeat;
     opacity: 0.8;
+  }
+
+  /* en teléfonos, la foto del hero en 828 px: la de 1600 px es para pantallas anchas */
+  @media (max-width: 828px) {
+    .hero__overlay {
+      background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('@/assets/hero-nosotros-movil.webp');
+    }
   }
 
   .hero__content {

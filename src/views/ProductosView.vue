@@ -219,6 +219,13 @@ onMounted(() => {
   color: white;
 }
 
+/* en teléfonos, la foto del hero en 828 px: la de 1600 px es para pantallas anchas */
+@media (max-width: 828px) {
+  .hero-section {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('@/assets/hero-nosotros-movil.webp');
+  }
+}
+
 .hero-content h1 {
   font-size: 3rem;
   font-family: var(--fuente-titulos);
