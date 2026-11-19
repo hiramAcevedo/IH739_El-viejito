@@ -77,8 +77,6 @@
 <script setup>
   import { onMounted, onBeforeUnmount, nextTick } from 'vue'
   import { RouterLink } from 'vue-router'
-  import Swiper from 'swiper'
-  import { Navigation, Pagination, Autoplay } from 'swiper/modules'
   import 'swiper/css'
   import 'swiper/css/navigation'
   import 'swiper/css/pagination'
@@ -98,7 +96,12 @@
 
   let swiperInstance = null
 
-  function initSwiper() {
+  let montado = true
+
+  // Swiper llega en su propio archivo, cuando ya hay productos que mostrar
+  async function initSwiper() {
+    const [{ default: Swiper }, { Navigation, Pagination, Autoplay }] = await Promise.all([import('swiper'), import('swiper/modules')])
+    if (!montado) return
     const totalSlides = productosStore.productos.length
     swiperInstance = new Swiper('.product-swiper', {
       modules: [Navigation, Pagination, Autoplay],
@@ -122,12 +125,15 @@
     await productosStore.fetchProductos()
     await nextTick()
     if (productosStore.productos.length) {
-      initSwiper()
+      await initSwiper()
     }
   })
 
   // al salir de la página, el carrusel deja de avanzar solo y suelta sus eventos
-  onBeforeUnmount(() => swiperInstance?.destroy(true, true))
+  onBeforeUnmount(() => {
+    montado = false
+    swiperInstance?.destroy(true, true)
+  })
 </script>
 
 <style scoped>

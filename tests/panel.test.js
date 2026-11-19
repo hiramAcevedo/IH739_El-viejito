@@ -68,6 +68,7 @@ async function montar(componente, { superadmin = true, nombre = 'Ana Pérez', st
   await router.push('/admin')
   await router.isReady()
   const wrapper = mount(componente, { global: { plugins: [pinia, router], stubs: { teleport: true, ...stubs } } })
+  await vi.dynamicImportSettled()
   await flushPromises()
   return { wrapper, router, auth }
 }

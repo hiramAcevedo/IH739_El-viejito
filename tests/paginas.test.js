@@ -78,6 +78,7 @@ async function montar(componente, ruta = '/', opciones = {}) {
   await router.push(ruta)
   await router.isReady()
   const wrapper = mount(componente, { global: { plugins: [router] }, ...opciones })
+  await vi.dynamicImportSettled()
   await flushPromises()
   return { wrapper, router }
 }
@@ -167,6 +168,17 @@ describe('HomeView', () => {
     await montar(HomeView)
     expect(swiper.instancias[0].opciones.loop).toBe(false)
     expect(swiper.instancias[0].opciones.breakpoints[1024].slidesPerView).toBe(2)
+  })
+
+  it('si se sale de la página antes de que llegue Swiper, el carrusel ya no se arma', async () => {
+    db.getProductos.mockResolvedValue(PRODUCTOS)
+    const router = createRouter({ history: createMemoryHistory(), routes: RUTAS })
+    await router.push('/')
+    await router.isReady()
+    mount(HomeView, { global: { plugins: [router] } }).unmount()
+    await vi.dynamicImportSettled()
+    await flushPromises()
+    expect(swiper.instancias).toHaveLength(0)
   })
 
   it('al salir de la página, el carrusel se destruye', async () => {

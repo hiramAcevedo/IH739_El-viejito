@@ -45,6 +45,7 @@ async function montar(componente, ruta = '/') {
   await router.push(ruta)
   await router.isReady()
   const wrapper = mount(componente, { global: { plugins: [router] } })
+  await vi.dynamicImportSettled()
   await flushPromises()
   return { wrapper, router }
 }

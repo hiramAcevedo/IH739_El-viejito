@@ -1,7 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { supabase } from '@/lib/supabaseClient'
 import { MODO_EJEMPLO } from '@/lib/api'
+
+/** supabase-js se descarga aparte, cuando el panel lo usa: las páginas públicas no esperan su código. */
+const conectar = async () => (await import('@/lib/supabaseClient')).supabase
 
 /**
  * Sesión de ejemplo del panel: sólo existe en el servidor de desarrollo con VITE_API_EJEMPLO=1 (actividad 3.2).
@@ -32,6 +34,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       loading.value = true
       isAdmin.value = false
+      const supabase = await conectar()
 
       // Sign in with Supabase Auth
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -89,6 +92,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
     try {
       loading.value = true
+      const supabase = await conectar()
 
       const { error } = await supabase.auth.signOut()
 
@@ -123,6 +127,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
     try {
       loading.value = true
+      const supabase = await conectar()
 
       const { data, error } = await supabase.auth.getUser()
 
@@ -176,7 +181,7 @@ export const useAuthStore = defineStore('auth', () => {
   /** El token que el panel manda a la API en cada operación. */
   async function token() {
     if (MODO_EJEMPLO) return 'token-de-ejemplo'
-    const { data } = await supabase.auth.getSession()
+    const { data } = await (await conectar()).auth.getSession()
     return data.session?.access_token || null
   }
 

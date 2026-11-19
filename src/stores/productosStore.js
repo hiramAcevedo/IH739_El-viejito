@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { getProductos } from '@/lib/supabaseClient'
 
 /**
  * Store de productos con caché en memoria.
@@ -26,6 +25,8 @@ export const useProductosStore = defineStore('productos', () => {
     loading.value = true
     error.value = false
     try {
+      // supabase-js llega en su propio archivo: el primer pintado del sitio no espera su código
+      const { getProductos } = await import('@/lib/supabaseClient')
       productos.value = await getProductos()
       loaded.value = true
       return productos.value
